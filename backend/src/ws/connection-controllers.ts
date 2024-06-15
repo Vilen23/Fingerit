@@ -12,7 +12,7 @@ export const handleJoin = async (data: any, ws: any) => {
       id: data.userId
     }
   })
-
+  if (!room || !client) return;
   ws.room = room;
   ws.clientId = client.id;
 }
