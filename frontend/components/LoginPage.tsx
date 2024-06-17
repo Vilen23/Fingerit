@@ -56,6 +56,7 @@ export default function () {
         {register.map((item) => {
           return (
             <input
+              key={item}
               autoComplete="off"
               onChange={(e) => setSignup({ ...signup, [item]: e.target.value })}
               type={item}
@@ -98,6 +99,7 @@ export default function () {
         {login.map((item) => {
           return (
             <input
+              key={item}
               onChange={(e) => setSignin({ ...signin, [item]: e.target.value })}
               type={item}
               placeholder={item}

@@ -49,10 +49,9 @@ export const NEXT_AUTH = {
     async signIn(user: any) {
       if (user.account.provider === "google") {
         const { email, name } = user.profile;
-        console.log(email, name);
         try {
           const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/signup/google`,
             { username: name, email, password: name }
           );
           if (response.status === 201) {
@@ -63,7 +62,7 @@ export const NEXT_AUTH = {
           return false;
         }
       }
-      return user.profile;
+      return true;
     },
     async jwt({ token, user }: any) {
       if (user) {
