@@ -16,9 +16,10 @@ export const NEXT_AUTH = {
       },
       async authorize(credentials) {
         try {
+          console.log(credentials);
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/signin`,
-            { username: credentials?.username, password: credentials?.password }
+            credentials
           );
           if (response.status === 201) {
             return response.data.user;
@@ -41,34 +42,42 @@ export const NEXT_AUTH = {
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: "/",
+  },
   callbacks: {
-    async jwt(token: any, user: any) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ token, session }: any) {
-      session.user.id = token.id;
-      return session;
-    },
     async signIn(user: any) {
       if (user.account.provider === "google") {
         const { email, name } = user.profile;
+        console.log(email, name);
         try {
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,
             { username: name, email, password: name }
           );
           if (response.status === 201) {
-            return true;
+            return { email, name, id: user.profile.id };
           }
         } catch (error) {
           console.log(error);
           return false;
         }
       }
-      return true;
+      return user.profile;
+    },
+    async jwt({ token, user }: any) {
+      if (user) {
+        token.id = user.id;
+        token.name = user.username || user.name;
+        token.email = user.email;
+      }
+      return token;
+    },
+    async session({ token, session }: any) {
+      session.user.id = token.id;
+      session.user.name = token.name;
+      session.user.email = token.email;
+      return session;
     },
   },
 };

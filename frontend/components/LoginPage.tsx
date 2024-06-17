@@ -39,12 +39,10 @@ export default function () {
   });
 
   const singinMutation = useMutation({
-    mutationFn: async (singin: SigninProps) => {
+    mutationFn: async () => {
       return await signIn("credentials", {
         username: signin.username,
         password: signin.password,
-        redirect: true,
-        callbackUrl: "/room/sfsfsfws",
       });
     },
   });
@@ -58,6 +56,7 @@ export default function () {
         {register.map((item) => {
           return (
             <input
+              autoComplete="off"
               onChange={(e) => setSignup({ ...signup, [item]: e.target.value })}
               type={item}
               placeholder={item}
@@ -108,7 +107,7 @@ export default function () {
         })}
         <button
           onClick={() => {
-            singinMutation.mutate(signin);
+            singinMutation.mutate();
           }}
           className="flex gap-2 justify-center bg-white/10 py-1 rounded-lg items-center"
         >
