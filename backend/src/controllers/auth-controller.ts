@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import db from "../lib/db";
-import bcrypt, { hash } from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { signInInput, signUpInput } from "../validation/auth-validation";
 
 export const signup = async (req: Request, res: Response) => {
@@ -10,7 +10,6 @@ export const signup = async (req: Request, res: Response) => {
     const { success } = signUpInput.safeParse(req.body);
     if (!success)
       return res.status(409).json({ error: "Invalid format of inputs" });
-
     const ifUser = await db.user.findFirst({
       where: {
         username: username,

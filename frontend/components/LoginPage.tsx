@@ -43,6 +43,8 @@ export default function () {
       return await signIn("credentials", {
         username: signin.username,
         password: signin.password,
+        redirect:true,
+        callbackUrl: "/practise",
       });
     },
   });
@@ -51,7 +53,7 @@ export default function () {
     <div className="flex md:flex-row flex-col justify-between px-[22vw] h-[60vh] items-center">
       <div className="flex flex-col gap-3">
         <h1 className="text-xl">
-          register to <span className="text-[#39FF14]">f</span>ingerIt
+          register to <span className="text-[#CD4E28]">f</span>ingerIt
         </h1>
         {register.map((item) => {
           return (
@@ -61,7 +63,7 @@ export default function () {
               onChange={(e) => setSignup({ ...signup, [item]: e.target.value })}
               type={item}
               placeholder={item}
-              className="bg-white/10 px-2 rounded-lg border-[1px] border-white/50 focus:outline-none py-1"
+              className="bg-white/10 px-2 rounded-lg border-[1px] border-[#EBDAB4]/50 focus:outline-none py-1"
             />
           );
         })}
@@ -86,7 +88,7 @@ export default function () {
             <p>loading...</p>
           ) : (
             <>
-              <FaUserCheck className="text-[#39FF14]" />
+              <FaUserCheck className="text-[#CD4E28]" />
               <p>sign up</p>
             </>
           )}
@@ -94,7 +96,7 @@ export default function () {
       </div>
       <div className="flex flex-col gap-3 ">
         <h1 className="text-xl">
-          <span className="text-[#39FF14]">l</span>ogin
+          <span className="text-[#CD4E28]">l</span>ogin
         </h1>
         {login.map((item) => {
           return (
@@ -103,7 +105,7 @@ export default function () {
               onChange={(e) => setSignin({ ...signin, [item]: e.target.value })}
               type={item}
               placeholder={item}
-              className="bg-white/10 px-2 rounded-lg border-[1px] border-white/50 focus:outline-none py-1"
+              className="bg-white/10 px-2 rounded-lg border-[1px] border-[#EBDAB4]/50 focus:outline-none py-1"
             />
           );
         })}
@@ -117,7 +119,7 @@ export default function () {
             "loading..."
           ) : (
             <>
-              <FaUserCheck className="text-[#39FF14]" />
+              <FaUserCheck className="text-[#CD4E28]" />
               <p>sign in</p>
             </>
           )}
@@ -128,7 +130,7 @@ export default function () {
           }}
           className="flex gap-2 justify-center bg-white/10 py-1 rounded-lg items-center"
         >
-          <FaGoogle className="text-[#39FF14]" />
+          <FaGoogle className="text-[#CD4E28]" />
           <p>google</p>
         </button>
       </div>

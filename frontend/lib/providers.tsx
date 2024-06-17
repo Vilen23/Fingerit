@@ -1,6 +1,7 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "next-auth/react";
+import { RecoilRoot } from "recoil";
 const queryclient = new QueryClient();
 export function Providers({
   children,
@@ -9,7 +10,9 @@ export function Providers({
 }>) {
   return (
     <QueryClientProvider client={queryclient}>
-      <SessionProvider>{children}</SessionProvider>
+      <RecoilRoot>
+        <SessionProvider>{children}</SessionProvider>
+      </RecoilRoot>
     </QueryClientProvider>
   );
 }
