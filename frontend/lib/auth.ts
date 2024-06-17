@@ -18,10 +18,10 @@ export const NEXT_AUTH = {
         try {
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/signin`,
-            { credentials }
+            { username: credentials?.username, password: credentials?.password }
           );
-          if (response.status === 200) {
-            return response.data;
+          if (response.status === 201) {
+            return response.data.user;
           } else throw new Error("Invalid credentials");
         } catch (error) {
           throw new Error("Internal server error");
@@ -42,19 +42,25 @@ export const NEXT_AUTH = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
+    async jwt(token: any, user: any) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
     async session({ token, session }: any) {
       session.user.id = token.id;
       return session;
     },
     async signIn(user: any) {
       if (user.account.provider === "google") {
-        const { login, email, name } = user.profile;
+        const { email, name } = user.profile;
         try {
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,
-            { username: name, email, password: login }
+            { username: name, email, password: name }
           );
-          if (response.status === 200) {
+          if (response.status === 201) {
             return true;
           }
         } catch (error) {
@@ -62,7 +68,7 @@ export const NEXT_AUTH = {
           return false;
         }
       }
-      return false;
+      return true;
     },
   },
 };

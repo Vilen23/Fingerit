@@ -1,11 +1,56 @@
-import React from "react";
+"use client";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { signIn } from "next-auth/react";
+import React, { useState } from "react";
 import { FaGoogle, FaUserCheck } from "react-icons/fa";
 
 const register = ["username", "email", "password"];
 const login = ["username", "password"];
+interface SignupProps {
+  username: string;
+  email?: string;
+  password: string;
+}
+
+interface SigninProps {
+  username: string;
+  password: string;
+}
+
 export default function () {
+  const [signup, setSignup] = useState<SignupProps>({
+    username: "",
+    email: "",
+    password: "",
+  });
+  const [signin, setSignin] = useState<SigninProps>({
+    username: "",
+    password: "",
+  });
+
+  const signupMutation = useMutation({
+    mutationFn: async (signup: SignupProps) => {
+      return await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,
+        signup
+      );
+    },
+  });
+
+  const singinMutation = useMutation({
+    mutationFn: async (singin: SigninProps) => {
+      return await signIn("credentials", {
+        username: signin.username,
+        password: signin.password,
+        redirect: true,
+        callbackUrl: "/room/sfsfsfws",
+      });
+    },
+  });
+
   return (
-    <div className="flex justify-between px-[22vw] h-[60vh] items-center">
+    <div className="flex md:flex-row flex-col justify-between px-[22vw] h-[60vh] items-center">
       <div className="flex flex-col gap-3">
         <h1 className="text-xl">
           register to <span className="text-[#39FF14]">f</span>ingerIt
@@ -13,15 +58,38 @@ export default function () {
         {register.map((item) => {
           return (
             <input
+              onChange={(e) => setSignup({ ...signup, [item]: e.target.value })}
               type={item}
               placeholder={item}
               className="bg-white/10 px-2 rounded-lg border-[1px] border-white/50 focus:outline-none py-1"
             />
           );
         })}
-        <button className="flex gap-2 justify-center bg-white/10 py-2 rounded-lg items-center">
-          <FaUserCheck className="text-[#39FF14]" />
-          <p>sign up</p>
+        {
+          //@ts-ignore
+          signupMutation.error?.response?.data.error && (
+            <p className="text-red-500 text-xs text-center">
+              {
+                //@ts-ignore
+                signupMutation.error?.response?.data.error
+              }
+            </p>
+          )
+        }
+        <button
+          onClick={() => {
+            signupMutation.mutate(signup);
+          }}
+          className="flex gap-2 justify-center bg-white/10 py-2 rounded-lg items-center"
+        >
+          {signupMutation.isPending ? (
+            <p>loading...</p>
+          ) : (
+            <>
+              <FaUserCheck className="text-[#39FF14]" />
+              <p>sign up</p>
+            </>
+          )}
         </button>
       </div>
       <div className="flex flex-col gap-3 ">
@@ -31,17 +99,34 @@ export default function () {
         {login.map((item) => {
           return (
             <input
+              onChange={(e) => setSignin({ ...signin, [item]: e.target.value })}
               type={item}
               placeholder={item}
               className="bg-white/10 px-2 rounded-lg border-[1px] border-white/50 focus:outline-none py-1"
             />
           );
         })}
-        <button className="flex gap-2 justify-center bg-white/10 py-1 rounded-lg items-center">
-          <FaUserCheck className="text-[#39FF14]" />
-          <p>sign up</p>
+        <button
+          onClick={() => {
+            singinMutation.mutate(signin);
+          }}
+          className="flex gap-2 justify-center bg-white/10 py-1 rounded-lg items-center"
+        >
+          {singinMutation.isPending ? (
+            "loading..."
+          ) : (
+            <>
+              <FaUserCheck className="text-[#39FF14]" />
+              <p>sign in</p>
+            </>
+          )}
         </button>
-        <button className="flex gap-2 justify-center bg-white/10 py-1 rounded-lg items-center">
+        <button
+          onClick={async () => {
+            await signIn("google", { callbackUrl: "/room/sfsfsfws" });
+          }}
+          className="flex gap-2 justify-center bg-white/10 py-1 rounded-lg items-center"
+        >
           <FaGoogle className="text-[#39FF14]" />
           <p>google</p>
         </button>

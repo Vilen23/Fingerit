@@ -34,6 +34,7 @@ export const signup = async (req: Request, res: Response) => {
 
 export const signin = async (req: Request, res: Response) => {
   try {
+    console.log("hello");
     const { username, password } = req.body;
 
     const { success } = signInInput.safeParse(req.body);
@@ -49,7 +50,7 @@ export const signin = async (req: Request, res: Response) => {
     const checkPassword = await bcrypt.compare(password, isUser.password);
     if (!checkPassword) return res.status(409).json({ error: "Wrong username/password" });
 
-    return res.status(201).json({ message: "User successfully signed in" });
+    return res.status(201).json({ message: "User successfully signed in" ,user:isUser});
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal Server Error" })
