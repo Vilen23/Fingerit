@@ -9,7 +9,7 @@ import { IoIosTime } from "react-icons/io";
 import { TiSortAlphabetically } from "react-icons/ti";
 import { useRecoilState } from "recoil";
 
-interface ModesProps {
+export interface ModesProps {
   time: boolean;
   words: boolean;
   custom: boolean;
@@ -23,41 +23,12 @@ export default function Navbar2() {
     words: true,
     custom: false,
   });
-  const [string, setString] = useRecoilState(wordsAtom);
-  const [isData, setIsData] = useRecoilState(isDataAtom);
-  const [wordsData, setWordsData] = useRecoilState(wordDataAtom);
-  const session = useSession();
   const [preference, setPreference] = useRecoilState(preferenceAtom);
+  console.log(preference.value);
+  const handlePreference = (value: number) => {
+    setPreference({ ...preference, value: value });
+  };
 
-  useEffect(() => {
-    if (session.data && isData === false) {
-      const getData = async () => {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/getData`
-        );
-        console.log(response.data)
-        if (response.status === 200) {
-          setWordsData(response.data.words);
-          setIsData(true);
-        }
-      };
-      getData();
-    }
-  }, [session]);
-
-  useEffect(() => {
-    if (session.data && mode.words) {
-      let stringtemp = "";
-      let common_words = wordsData.common_words;
-      for (let i = 0; i < preference.value; i++) {
-        let randomIndex = Math.floor(Math.random() * common_words.length);
-        stringtemp += common_words[randomIndex] + " ";
-      }
-      setString(stringtemp.trim());
-    }
-  }, [mode, preference, session.data, setString]);
-
-  if (!session.data) return <div>Loading...</div>;
   return (
     <div className="w-full flex justify-center ">
       <div className="bg-[#1D2021] h-[40px] flex items-center gap-4 px-10 rounded-lg">
@@ -96,9 +67,9 @@ export default function Navbar2() {
                 return (
                   <p
                     key={index}
-                    onClick={() =>
-                      setPreference({ ...preference, value: item })
-                    }
+                    onClick={() => {
+                      handlePreference(item);
+                    }}
                     className={`${
                       preference.value === item
                         ? "text-[#F99B32]"

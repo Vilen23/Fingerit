@@ -7,7 +7,7 @@ export const preferenceAtom = atom({
   key: "preferenceAtom",
   default: {
     mode: "words",
-    value: "10",
+    value: 10,
   },
   effects_UNSTABLE: [persistAtom],
 });
