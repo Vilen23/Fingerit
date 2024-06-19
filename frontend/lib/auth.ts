@@ -16,12 +16,12 @@ export const NEXT_AUTH = {
       },
       async authorize(credentials) {
         try {
-          console.log(credentials);
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/signin`,
             credentials
           );
           if (response.status === 201) {
+            // console.log(response.data.user)
             return response.data.user;
           } else throw new Error("Invalid credentials");
         } catch (error) {
@@ -55,24 +55,28 @@ export const NEXT_AUTH = {
             { username: name, email, password: name }
           );
           if (response.status === 201) {
-            return { email, name, id: user.profile.id };
+            return true; 
           }
         } catch (error) {
           console.log(error);
-          return false;
+          return false; 
         }
       }
       return true;
     },
     async jwt({ token, user }: any) {
       if (user) {
+        console.log(user);
+        token.words = user.words;
         token.id = user.id;
         token.name = user.username || user.name;
         token.email = user.email;
       }
+
       return token;
     },
     async session({ token, session }: any) {
+      session.user.words = token.words;
       session.user.id = token.id;
       session.user.name = token.name;
       session.user.email = token.email;

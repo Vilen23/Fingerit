@@ -1,8 +1,9 @@
 "use client";
 import { resultAtom } from "@/states/atoms/result";
+import { wordsAtom } from "@/states/atoms/words";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 
 interface LetterProps {
   letter: string;
@@ -18,9 +19,7 @@ export default function TypingComponent() {
   const [result, setResult] = useRecoilState(resultAtom);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [letterarray, setLetterarray] = useState<LetterProps[]>([]);
-  const [textstring, setTextstring] = useState(
-    "The quick fox jump over the fence"
-  );
+  const textstring = useRecoilValue(wordsAtom);
   const [rawspeed, setRawSpeed] = useState(0);
   useEffect(() => {
     let temparray = Array.from(textstring).map((char) => ({
@@ -46,7 +45,7 @@ export default function TypingComponent() {
     if (cursorIndex === textstring.length) {
       let accuracy = (correctInput / textstring.length) * 100;
       const curr = new Date().getTime();
-      if(!startTime) return;
+      if (!startTime) return;
       const timeElapsed = (curr - startTime) / 1000 / 60;
       const rawspeed = Math.max(
         0,
@@ -89,11 +88,15 @@ export default function TypingComponent() {
     setLetterarray(newarray);
   };
 
-  console.log(cursorIndex);
+  const handleKeyPresses = (event: any) => {
+    if (event.key === "Backspace") {
+      event.preventDefault(); 
+    }
+  };
 
   return (
-    <div className="flex justify-center items-center flex-col h-[70vh]">
-      <div className="text-[40px] relative">
+    <div className="flex justify-center items-center flex-col h-[60vh]">
+      <div className="text-[40px] relative w-[80vw]">
         {letterarray.map((word, index) => (
           <span key={index} className={`${word.color} relative`}>
             <span className="absolute top-2">
@@ -107,9 +110,9 @@ export default function TypingComponent() {
         autoFocus
         type="text"
         placeholder=""
-        onChange={handleInputChange}
-        className="mt-4 p-2 border rounded opacity-0 absolute"
-        style={{ width: "80%" }}
+        onKeyDown={handleKeyPresses}
+        onChange={handleInputChange} 
+        className="mt-4 p-2 border-0 bg-[#1D2021] rounded opacity-100 w-[80vw]"
       />
       <div className="text-2xl mt-5">{speed} - WPM</div>
     </div>

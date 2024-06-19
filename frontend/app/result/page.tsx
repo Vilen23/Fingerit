@@ -1,11 +1,15 @@
 "use client";
 import { resultAtom } from "@/states/atoms/result";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRecoilValue } from "recoil";
 
 export default function page() {
   const result = useRecoilValue(resultAtom);
-
+  useEffect(() => {
+    if (!result.accuracy) {
+      window.location.href = "/practise";
+    }
+  }, [result.accuracy]);
   return (
     <div>
       <h1>Result</h1>

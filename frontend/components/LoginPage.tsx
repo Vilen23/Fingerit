@@ -40,12 +40,14 @@ export default function () {
 
   const singinMutation = useMutation({
     mutationFn: async () => {
-      return await signIn("credentials", {
+      await signIn("credentials", {
         username: signin.username,
         password: signin.password,
-        redirect:true,
-        callbackUrl: "/practise",
+        redirect: false,
+        callbackUrl: "/",
       });
+      window.location.href = "/practise";
+      return;
     },
   });
 
@@ -58,6 +60,7 @@ export default function () {
         {register.map((item) => {
           return (
             <input
+              autoFocus
               key={item}
               autoComplete="off"
               onChange={(e) => setSignup({ ...signup, [item]: e.target.value })}
