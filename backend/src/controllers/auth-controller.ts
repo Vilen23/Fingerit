@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import db from "../lib/db";
 import bcrypt from "bcryptjs";
 import { signInInput, signUpInput } from "../validation/auth-validation";
+import { words } from "../data/data";
 
 export const signup = async (req: Request, res: Response) => {
   try {
@@ -52,9 +53,14 @@ export const signin = async (req: Request, res: Response) => {
     const checkPassword = await bcrypt.compare(password, isUser.password);
     if (!checkPassword)
       return res.status(409).json({ error: "Wrong username/password" });
-    return res
-      .status(201)
-      .json({ message: "User successfully signed in", user: isUser });
+    return res.status(201).json({
+      message: "User successfully signed in",
+      user: {
+        username: isUser.username,
+        email: isUser.email,
+        words: words,
+      },
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -85,7 +91,9 @@ export const googleSignup = async (req: Request, res: Response) => {
       const checkPassword = await bcrypt.compare(password, user.password);
       if (!checkPassword)
         return res.status(409).json({ error: "Wrong password" });
-      return res.status(201).json({ message: "User successfully signed in" });
+      return res
+        .status(201)
+        .json({ message: "User successfully signed in", words });
     }
   } catch (error) {
     console.log(error);
