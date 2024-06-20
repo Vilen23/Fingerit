@@ -129,7 +129,7 @@ export default function () {
         </button>
         <button
           onClick={async () => {
-            await signIn("google", { callbackUrl: "/room/sfsfsfws" });
+            await signIn("google", { callbackUrl: "/practise" });
           }}
           className="flex gap-2 justify-center bg-white/10 py-1 rounded-lg items-center"
         >

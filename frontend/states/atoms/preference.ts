@@ -9,5 +9,14 @@ export const preferenceAtom = atom({
     mode: "words",
     value: 10,
   },
-  effects_UNSTABLE: [persistAtom],
+});
+
+export const charCustomAtom = atom({
+  key: "charCustomAtom",
+  default: "",
+});
+
+export const customReadyAtom = atom({
+  key: "customReadyAtom",
+  default: false,
 });

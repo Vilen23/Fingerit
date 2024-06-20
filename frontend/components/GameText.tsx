@@ -5,7 +5,11 @@ import { useEffect, useRef, useState } from "react";
 import { selector, useRecoilState, useRecoilValue } from "recoil";
 import { useSession } from "next-auth/react";
 import axios from "axios";
-import { preferenceAtom } from "@/states/atoms/preference";
+import {
+  charCustomAtom,
+  customReadyAtom,
+  preferenceAtom,
+} from "@/states/atoms/preference";
 import "./cursorblink.css";
 import ResultCard from "./ResultCard";
 interface LetterProps {
@@ -15,9 +19,13 @@ interface LetterProps {
 
 export default function TypingComponent() {
   const session = useSession();
-  const preference = useRecoilValue(preferenceAtom);
+  const [fetch, setFetch] = useState(false);
+  const [maxWrong, setMaxWrong] = useState(0);
+  const [totaltype, setTotaltype] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const [cursorIndex, setCursorIndex] = useState(0);
+  const [wrongInputs, setwrongInputs] = useState(0);
+  const preference = useRecoilValue(preferenceAtom);
   const [correctInput, setCorrectInput] = useState(0);
   const [isgameOver, setIsgameOver] = useState(false);
   const [result, setResult] = useRecoilState(resultAtom);
@@ -26,10 +34,8 @@ export default function TypingComponent() {
   const [wordsData, setWordsData] = useRecoilState(wordDataAtom);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [letterarray, setLetterarray] = useState<LetterProps[]>([]);
-  const [fetch, setFetch] = useState(false);
-  const [wrongInputs, setwrongInputs] = useState(0);
-  const [maxWrong, setMaxWrong] = useState(0);
-  const [totaltype, setTotaltype] = useState(0);
+  const [charCustom, setCharCustom] = useRecoilState(charCustomAtom);
+  const [customReady, setCustomReady] = useRecoilState(customReadyAtom);
 
   //Fetching the words from the backend and setting them into recoil state and persisting it into local storage
   useEffect(() => {
@@ -60,11 +66,36 @@ export default function TypingComponent() {
     if (inputRef.current) inputRef.current.value = "";
     let stringtemp = "";
     let common_words = wordsData.common_words;
-    for (let i = 0; i < preference.value; i++) {
-      console.log(preference.value);
-      let randomIndex = Math.floor(Math.random() * common_words.length);
-      stringtemp += common_words[randomIndex] + " ";
+    if (preference.mode === "words") {
+      for (let i = 0; i < preference.value; i++) {
+        let randomIndex = Math.floor(Math.random() * common_words.length);
+        stringtemp += common_words[randomIndex] + " ";
+      }
+    } else if (preference.mode === "time") {
+      for (let i = 0; i < common_words.length; i++) {
+        let randomIndex = Math.floor(Math.random() * common_words.length);
+        stringtemp += common_words[randomIndex] + " ";
+      }
+    } else if (preference.mode === "custom" && customReady) {
+      let char = charCustom;
+      let characters = char.split("");
+      const filteredWords = common_words.filter((word:any) =>
+        characters.some((char) => word.includes(char))
+      );
+    
+      // Shuffle the filteredWords array
+      for (let i = filteredWords.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [filteredWords[i], filteredWords[j]] = [filteredWords[j], filteredWords[i]];
+      }
+    
+      const maxWords = Math.min(filteredWords.length, 30);
+      const selectedWords = filteredWords.slice(0, maxWords);
+    
+      stringtemp = selectedWords.join(" ") + " ";
     }
+    
+
     let wordsstring = stringtemp.trim();
     setTextstring(wordsstring);
     let temparray = Array.from(wordsstring).map((char) => ({
@@ -73,10 +104,9 @@ export default function TypingComponent() {
     }));
     setLetterarray(temparray);
     setFetch(true);
-  }, [session.data, preference.value, fetch]);
+  }, [session.data, preference, fetch, customReady]);
 
   useEffect(() => {
-    console.log("hello");
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -152,7 +182,6 @@ export default function TypingComponent() {
     }
 
     //To make backspace only work when wrong input and not let any other input come
-
     if (event.key === "Backspace" && wrongInputs === 0) {
       event.preventDefault();
     }
@@ -185,7 +214,7 @@ export default function TypingComponent() {
         placeholder=""
         onKeyDown={handleKeyPresses}
         onChange={handleInputChange}
-        className="mt-4 p-2 border-0 bg-[#1D2021] rounded absolute opacity-0 h-[60vh] w-[80vw]"
+        className="mt-4 p-2 border-0 rounded absolute opacity-0 h-[60vh] w-[80vw] "
       />
       {isgameOver && (
         <div className="absolute bottom-[200px]">
