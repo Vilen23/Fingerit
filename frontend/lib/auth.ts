@@ -55,6 +55,7 @@ export const NEXT_AUTH = {
             { username: name, email, password: name }
           );
           if (response.status === 201) {
+            console.log(response.data);
             return true; 
           }
         } catch (error) {

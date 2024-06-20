@@ -89,7 +89,7 @@ export default function TypingComponent() {
         [filteredWords[i], filteredWords[j]] = [filteredWords[j], filteredWords[i]];
       }
     
-      const maxWords = Math.min(filteredWords.length, 30);
+      const maxWords = Math.min(filteredWords.length, characters.length * 10);
       const selectedWords = filteredWords.slice(0, maxWords);
     
       stringtemp = selectedWords.join(" ") + " ";
@@ -191,6 +191,8 @@ export default function TypingComponent() {
     }
     if (wrongInputs > 0 && event.key !== "Backspace") event.preventDefault();
   };
+
+  if(!session || !session.data) return <div>Loading....</div>
 
   return (
     <div className="flex justify-center items-center flex-col h-[60vh]">

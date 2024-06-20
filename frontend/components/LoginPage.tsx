@@ -43,10 +43,9 @@ export default function () {
       await signIn("credentials", {
         username: signin.username,
         password: signin.password,
-        redirect: false,
-        callbackUrl: "/",
+        redirect: true,
+        callbackUrl: "/practise",
       });
-      window.location.href = "/practise";
       return;
     },
   });
