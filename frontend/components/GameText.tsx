@@ -6,7 +6,8 @@ import { selector, useRecoilState, useRecoilValue } from "recoil";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import { preferenceAtom } from "@/states/atoms/preference";
-import "./cursorblink.css"
+import "./cursorblink.css";
+import ResultCard from "./ResultCard";
 interface LetterProps {
   letter: string;
   color: string;
@@ -46,43 +47,40 @@ export default function TypingComponent() {
     }
   }, [session, isData]);
 
-  useRecoilValue(
-    selector({
-      key: "generatedWords",
-      get: ({ get }) => {
-        const prefer = get(preferenceAtom);
-        setFetch(false);
-        return prefer.value;
-      },
-    })
-  );
-
   //Generating the words for the test
   useEffect(() => {
-    if (!fetch) {
-      let stringtemp = "";
-      let common_words = wordsData.common_words;
-      for (let i = 0; i < preference.value; i++) {
-        console.log(preference.value);
-        let randomIndex = Math.floor(Math.random() * common_words.length);
-        stringtemp += common_words[randomIndex] + " ";
-      }
-      let wordsstring = stringtemp.trim();
-      setTextstring(wordsstring);
-      let temparray = Array.from(wordsstring).map((char) => ({
-        letter: char,
-        color: "text-[#EBDAB4]/50",
-      }));
-      setLetterarray(temparray);
-      setFetch(true);
+    setCursorIndex(0);
+    setStartTime(0);
+    setIsgameOver(false);
+    setCorrectInput(0);
+    setwrongInputs(0);
+    setMaxWrong(0);
+    setResult({ accuracy: "0", speed: "0", rawspeed: "0" });
+    setTotaltype(0);
+    if (inputRef.current) inputRef.current.value = "";
+    let stringtemp = "";
+    let common_words = wordsData.common_words;
+    for (let i = 0; i < preference.value; i++) {
+      console.log(preference.value);
+      let randomIndex = Math.floor(Math.random() * common_words.length);
+      stringtemp += common_words[randomIndex] + " ";
     }
-  }, [session.data, preference, fetch]);
+    let wordsstring = stringtemp.trim();
+    setTextstring(wordsstring);
+    let temparray = Array.from(wordsstring).map((char) => ({
+      letter: char,
+      color: "text-[#EBDAB4]/50",
+    }));
+    setLetterarray(temparray);
+    setFetch(true);
+  }, [session.data, preference.value, fetch]);
 
   useEffect(() => {
+    console.log("hello");
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [preference]);
 
   const handleInputChange = (event: any) => {
     let ans = event.target.value;
@@ -122,10 +120,7 @@ export default function TypingComponent() {
       const accuracy =
         ((textstring.length - maxWrong - 1) / (textstring.length - 1)) * 100;
       const timeElapsed = (curr - startTime) / 1000 / 60;
-      const rawspeed = Math.max(
-        0,
-        Math.round(totaltype / 5 / timeElapsed)
-      );
+      const rawspeed = Math.max(0, Math.round(totaltype / 5 / timeElapsed));
       const wordsTyped = correctInput / 5;
       const wpm = wordsTyped / timeElapsed;
       const speed = Math.max(0, Math.round(wpm));
@@ -144,7 +139,7 @@ export default function TypingComponent() {
       event.preventDefault();
     }
     if (event.key === "Enter") {
-      setFetch(false);
+      setFetch(!fetch);
       setCursorIndex(0);
       setStartTime(0);
       setIsgameOver(false);
@@ -177,9 +172,8 @@ export default function TypingComponent() {
             className={`${word.color} transition-all duration-200 relative`}
           >
             {index === cursorIndex && (
-              <span className="absolute top-2 cursor-blink">
-                _
-              </span>)}
+              <span className="absolute top-2 cursor-blink">_</span>
+            )}
             {word.letter}
           </span>
         ))}
@@ -194,13 +188,13 @@ export default function TypingComponent() {
         className="mt-4 p-2 border-0 bg-[#1D2021] rounded absolute opacity-0 h-[60vh] w-[80vw]"
       />
       {isgameOver && (
-        <>
-          <div className="mt-4 absolute bottom-[200px] text-4xl">
-            <p>Speed: {result.speed} WPM</p>
-            <p>Raw Speed: {result.rawspeed} WPM</p>
-            <p>Accuracy: {result.accuracy}%</p>
-          </div>
-        </>
+        <div className="absolute bottom-[200px]">
+          <ResultCard
+            accuracy={result.accuracy}
+            speed={result.speed}
+            rawspeed={result.rawspeed}
+          />
+        </div>
       )}
       <div className="flex absolute items-center gap-2 bottom-10">
         <span className="bg-[#F6D99A] text-[#282828] text-[13px] p-[2px] px-[5px] font-semibold">
