@@ -20,6 +20,6 @@ export const wss = new WebSocketServer({ server: httpServer });
 
 app.use('/auth', authRouter);
 app.use('/room', roomRouter);
-app.use('/getData',dataRouter);
+app.use('/getData', dataRouter);
 
 

@@ -56,6 +56,7 @@ export const signin = async (req: Request, res: Response) => {
     return res.status(201).json({
       message: "User successfully signed in",
       user: {
+        id: isUser.id,
         username: isUser.username,
         email: isUser.email,
         words: words,
@@ -86,14 +87,14 @@ export const googleSignup = async (req: Request, res: Response) => {
           password: hashPassword,
         },
       });
-      return res.status(201).json({ message: "User successfully created" });
+      return res.status(201).json({ message: "User successfully created", user });
     } else {
       const checkPassword = await bcrypt.compare(password, user.password);
       if (!checkPassword)
         return res.status(409).json({ error: "Wrong password" });
       return res
         .status(201)
-        .json({ message: "User successfully signed in", words });
+        .json({ message: "User successfully signed in", user });
     }
   } catch (error) {
     console.log(error);
