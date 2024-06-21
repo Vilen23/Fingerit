@@ -35,7 +35,7 @@ export default function TypingComponent() {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [letterarray, setLetterarray] = useState<LetterProps[]>([]);
   const [charCustom, setCharCustom] = useRecoilState(charCustomAtom);
-  const [customReady, setCustomReady] = useRecoilState(customReadyAtom);
+  const [customReady, setCustomReady] = useRecoilState(customReadyAtom)
 
   //Fetching the words from the backend and setting them into recoil state and persisting it into local storage
   useEffect(() => {
@@ -79,22 +79,21 @@ export default function TypingComponent() {
     } else if (preference.mode === "custom" && customReady) {
       let char = charCustom;
       let characters = char.split("");
-      const filteredWords = common_words.filter((word:any) =>
+      const filteredWords = common_words.filter((word: any) =>
         characters.some((char) => word.includes(char))
       );
-    
+
       // Shuffle the filteredWords array
       for (let i = filteredWords.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [filteredWords[i], filteredWords[j]] = [filteredWords[j], filteredWords[i]];
       }
-    
-      const maxWords = Math.min(filteredWords.length, characters.length * 10);
+
+      const maxWords = Math.min(filteredWords.length, preference.value);
       const selectedWords = filteredWords.slice(0, maxWords);
-    
+
       stringtemp = selectedWords.join(" ") + " ";
     }
-    
 
     let wordsstring = stringtemp.trim();
     setTextstring(wordsstring);
@@ -107,10 +106,10 @@ export default function TypingComponent() {
   }, [session.data, preference, fetch, customReady]);
 
   useEffect(() => {
-    if (inputRef.current) {
+    if (inputRef.current && customReady) {
       inputRef.current.focus();
     }
-  }, [preference]);
+  }, [preference, customReady]);
 
   const handleInputChange = (event: any) => {
     let ans = event.target.value;
@@ -192,7 +191,7 @@ export default function TypingComponent() {
     if (wrongInputs > 0 && event.key !== "Backspace") event.preventDefault();
   };
 
-  if(!session || !session.data) return <div>Loading....</div>
+  if (!session || !session.data) return <div className="flex justify-center items-center flex-col h-[60vh]">Loading....</div>
 
   return (
     <div className="flex justify-center items-center flex-col h-[60vh]">
@@ -216,7 +215,7 @@ export default function TypingComponent() {
         placeholder=""
         onKeyDown={handleKeyPresses}
         onChange={handleInputChange}
-        className="mt-4 p-2 border-0 rounded absolute opacity-0 h-[60vh] w-[80vw] "
+        className="mt-4 p-2 border-0 rounded absolute opacity-0  w-[80vw] "
       />
       {isgameOver && (
         <div className="absolute bottom-[200px]">

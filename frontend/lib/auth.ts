@@ -8,11 +8,7 @@ export const NEXT_AUTH = {
       name: "Credentials",
       credentials: {
         username: { label: "username", type: "text", placeholder: "username" },
-        password: {
-          label: "password",
-          type: "password",
-          placeholder: "password",
-        },
+        password: { label: "password", type: "password", placeholder: "password" },
       },
       async authorize(credentials) {
         try {
@@ -21,7 +17,6 @@ export const NEXT_AUTH = {
             credentials
           );
           if (response.status === 201) {
-            // console.log(response.data.user)
             return response.data.user;
           } else throw new Error("Invalid credentials");
         } catch (error) {
@@ -46,34 +41,35 @@ export const NEXT_AUTH = {
     signIn: "/",
   },
   callbacks: {
-    async signIn(user: any) {
-      if (user.account.provider === "google") {
-        const { email, name } = user.profile;
+    async signIn(googleuser: any) {
+      if (googleuser.account.provider === "google") {
+        const { email, name } = googleuser.profile;
         try {
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/signup/google`,
             { username: name, email, password: name }
           );
           if (response.status === 201) {
-            console.log(response.data);
-            return true; 
+            const user = response.data.user;
+            googleuser.user = user;
+            return googleuser.user;
+          } else {
+            return false;
           }
         } catch (error) {
           console.log(error);
-          return false; 
+          return false;
         }
       }
       return true;
     },
     async jwt({ token, user }: any) {
       if (user) {
-        console.log(user);
         token.words = user.words;
         token.id = user.id;
-        token.name = user.username || user.name;
+        token.name = user.name || user.username;
         token.email = user.email;
       }
-
       return token;
     },
     async session({ token, session }: any) {
@@ -85,3 +81,4 @@ export const NEXT_AUTH = {
     },
   },
 };
+
