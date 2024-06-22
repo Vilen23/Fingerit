@@ -7,7 +7,6 @@ import { useRecoilValue } from 'recoil'
 
 export default function page() {
   const preference = useRecoilValue(preferenceAtom);
-  console.log(preference)
   return (
     <div>
       {(preference.mode === "challenge") ? (<MakeRoom />) : <TypingComponent />}

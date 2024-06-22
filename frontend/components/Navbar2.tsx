@@ -48,7 +48,6 @@ export default function Navbar2() {
       setError("Cannot exceed 4 characters");
       return;
     }
-    console.log("ready");
     setCustomReady(true);
   };
 

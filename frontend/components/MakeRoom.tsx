@@ -1,11 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import { BsDoorClosed } from "react-icons/bs";
-import { delay, easeInOut, motion } from "framer-motion";
+import { easeInOut, motion } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 interface RoomProps {
   roomname: string;
@@ -79,8 +78,8 @@ export default function () {
     <div className="flex w-full justify-center items-center h-[60vh] flex-col gap-2">
       <motion.button
         key={formtype.makeroom ? "make-room" : "join-room"}
-        initial={{ y: "80px", opacity: "1" }}
-        animate={{ y: "0", opacity: "100" }}
+        initial={{ y: "80px", opacity: "0" }}
+        animate={{ y: "0", opacity: "1" }}
         transition={{
           duration: 0.5,
           delay: firstTime ? 0 : 0.5,
@@ -94,15 +93,15 @@ export default function () {
         {!formtype.joinroom ? "Join" : "Make"} Room?
       </motion.button>
       <motion.div
-        initial={{ y: "-200px", opacity: "1" }}
-        animate={{ y: "0px", opacity: "100" }}
+        initial={{ y: "-200px", opacity: "0" }}
+        animate={{ y: "0px", opacity: "1" }}
         transition={{
           duration: 0.5,
           type: "spring",
           damping: 20,
           stiffness: 100,
         }}
-        exit={{ y: "400px", opacity: "1" }}
+        exit={{ y: "400px", opacity: "0" }}
         className="flex flex-col gap-4 bg-[#3C3933] rounded-lg p-10 shadow-lg z-20"
       >
         <input
@@ -128,8 +127,8 @@ export default function () {
         <motion.button
           key={formtype.makeroom ? "make-room" : "join-room"}
           onClick={handleRoomButtonClick}
-          initial={{ y: "-50px", opacity: "1" }}
-          animate={{ y: "0", opacity: "100" }}
+          initial={{ y: "-50px", opacity: "0" }}
+          animate={{ y: "0", opacity: "1" }}
           transition={{
             duration: 0.5,
             type: "easeInOut",

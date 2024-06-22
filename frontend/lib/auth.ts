@@ -47,11 +47,9 @@ export const NEXT_AUTH = {
         try {
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/signup/google`,
-            { username: name, email, password: name }
+            { username: name, email, password: name,userId:googleuser.user.id }
           );
           if (response.status === 201) {
-            const user = response.data.user;
-            googleuser.user = user;
             return googleuser.user;
           } else {
             return false;

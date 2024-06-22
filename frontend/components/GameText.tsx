@@ -1,6 +1,11 @@
 "use client";
 import { resultAtom } from "@/states/atoms/result";
-import { isDataAtom, wordDataAtom, wordsAtom } from "@/states/atoms/words";
+import {
+  challengeAtom,
+  isDataAtom,
+  wordDataAtom,
+  wordsAtom,
+} from "@/states/atoms/words";
 import { useEffect, useRef, useState } from "react";
 import { selector, useRecoilState, useRecoilValue } from "recoil";
 import { useSession } from "next-auth/react";
@@ -12,6 +17,8 @@ import {
 } from "@/states/atoms/preference";
 import "./cursorblink.css";
 import ResultCard from "./ResultCard";
+import { roomownerAtom } from "@/states/atoms/roomowner";
+import { challengeUsers } from "@/states/atoms/challenge";
 interface LetterProps {
   letter: string;
   color: string;
@@ -32,10 +39,13 @@ export default function TypingComponent() {
   const [isData, setIsData] = useRecoilState(isDataAtom);
   const [textstring, setTextstring] = useRecoilState(wordsAtom);
   const [wordsData, setWordsData] = useRecoilState(wordDataAtom);
+  const [roomOwner, setRoomOwner] = useRecoilState(roomownerAtom);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [letterarray, setLetterarray] = useState<LetterProps[]>([]);
   const [charCustom, setCharCustom] = useRecoilState(charCustomAtom);
-  const [customReady, setCustomReady] = useRecoilState(customReadyAtom)
+  const [customReady, setCustomReady] = useRecoilState(customReadyAtom);
+  const [users, setUsers] = useRecoilState(challengeUsers);
+
 
   //Fetching the words from the backend and setting them into recoil state and persisting it into local storage
   useEffect(() => {
@@ -53,6 +63,47 @@ export default function TypingComponent() {
     }
   }, [session, isData]);
 
+  useEffect(() => {
+    if (preference.mode === "challenge" && session?.data?.user) {
+      const ws = new WebSocket("ws://localhost:8080");
+      let stringtemp = ""
+      let common_words = wordsData.common_words;
+      for (let i = 0; i < 10; i++) {
+        let randomIndex = Math.floor(Math.random() * common_words.length);
+        stringtemp += common_words[randomIndex] + " ";
+      }
+      ws.onopen = () => {
+        ws.send(JSON.stringify({
+          action: "joinRoom",
+          payload: {
+            roomId: window.location.pathname.split("/")[2],
+            userId: session.data.user.id,
+            word: stringtemp
+          }
+        }))
+      }
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.action === "userJoined") {
+          setUsers(data.payload.users);
+          setRoomOwner(data.payload.roomOwner)
+          stringtemp = data.payload.words;
+          console.log(stringtemp);
+          let wordsstring = stringtemp.trim();
+          setTextstring(wordsstring);
+          let temparray = Array.from(wordsstring).map((char) => ({
+            letter: char,
+            color: "text-[#EBDAB4]/50",
+          }));
+          setLetterarray(temparray);
+          setFetch(true);
+        }
+      }
+
+
+    }
+  }, [session])
+
   //Generating the words for the test
   useEffect(() => {
     setCursorIndex(0);
@@ -64,15 +115,11 @@ export default function TypingComponent() {
     setResult({ accuracy: "0", speed: "0", rawspeed: "0" });
     setTotaltype(0);
     if (inputRef.current) inputRef.current.value = "";
+    if (preference.mode === "challenge") return;
     let stringtemp = "";
     let common_words = wordsData.common_words;
     if (preference.mode === "words") {
       for (let i = 0; i < preference.value; i++) {
-        let randomIndex = Math.floor(Math.random() * common_words.length);
-        stringtemp += common_words[randomIndex] + " ";
-      }
-    } else if (preference.mode === "time") {
-      for (let i = 0; i < common_words.length; i++) {
         let randomIndex = Math.floor(Math.random() * common_words.length);
         stringtemp += common_words[randomIndex] + " ";
       }
@@ -82,19 +129,18 @@ export default function TypingComponent() {
       const filteredWords = common_words.filter((word: any) =>
         characters.some((char) => word.includes(char))
       );
-
-      // Shuffle the filteredWords array
       for (let i = filteredWords.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [filteredWords[i], filteredWords[j]] = [filteredWords[j], filteredWords[i]];
+        [filteredWords[i], filteredWords[j]] = [
+          filteredWords[j],
+          filteredWords[i],
+        ];
       }
-
       const maxWords = Math.min(filteredWords.length, preference.value);
       const selectedWords = filteredWords.slice(0, maxWords);
-
       stringtemp = selectedWords.join(" ") + " ";
     }
-
+    console.log(stringtemp)
     let wordsstring = stringtemp.trim();
     setTextstring(wordsstring);
     let temparray = Array.from(wordsstring).map((char) => ({
@@ -191,7 +237,12 @@ export default function TypingComponent() {
     if (wrongInputs > 0 && event.key !== "Backspace") event.preventDefault();
   };
 
-  if (!session || !session.data) return <div className="flex justify-center items-center flex-col h-[60vh]">Loading....</div>
+  if (!session || !session.data)
+    return (
+      <div className="flex justify-center items-center flex-col h-[60vh]">
+        Loading....
+      </div>
+    );
 
   return (
     <div className="flex justify-center items-center flex-col h-[60vh]">

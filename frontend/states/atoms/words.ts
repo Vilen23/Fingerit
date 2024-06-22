@@ -20,3 +20,8 @@ export const isDataAtom = atom({
   default: false,
   effects_UNSTABLE: [persistAtom],
 });
+
+export const challengeAtom = atom({
+  key: "challengeAtom",
+  default: "",
+});

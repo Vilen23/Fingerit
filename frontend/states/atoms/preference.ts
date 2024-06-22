@@ -9,6 +9,7 @@ export const preferenceAtom = atom({
     mode: "words",
     value: 10,
   },
+  effects_UNSTABLE: [persistAtom],
 });
 
 export const charCustomAtom = atom({
