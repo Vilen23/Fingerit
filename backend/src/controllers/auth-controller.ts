@@ -36,7 +36,6 @@ export const signup = async (req: Request, res: Response) => {
 
 export const signin = async (req: Request, res: Response) => {
   try {
-    console.log("hello");
     const { username, password } = req.body;
     const parse = signInInput.safeParse(req.body);
     if (!parse.success)
@@ -70,7 +69,7 @@ export const signin = async (req: Request, res: Response) => {
 
 export const googleSignup = async (req: Request, res: Response) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password,userId } = req.body;
     const { success } = signUpInput.safeParse(req.body);
     if (!success) return res.status(409).json({ error: "Invalid Inputs" });
     let user = await db.user.findFirst({
@@ -82,11 +81,13 @@ export const googleSignup = async (req: Request, res: Response) => {
       const hashPassword = await bcrypt.hash(password, 10);
       user = await db.user.create({
         data: {
+          id:userId,
           username,
           email,
           password: hashPassword,
         },
       });
+      console.log(user)
       return res.status(201).json({ message: "User successfully created", user });
     } else {
       const checkPassword = await bcrypt.compare(password, user.password);

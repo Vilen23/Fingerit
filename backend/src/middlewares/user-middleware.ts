@@ -5,7 +5,6 @@ export const UserMiddleware = async (req: Request, res: Response, next: NextFunc
   try {
     const { userId } = req.body;
     if (!userId) return res.status(409).json({ error: "Invalid request" });
-    console.log(userId)
     const finduser = await db.user.findFirst({
       where: {
         id: userId

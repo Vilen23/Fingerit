@@ -13,25 +13,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{
-  id String @id @default(cuid())
-  username String
-  password String
-  email String?
-  rooms RoomUser[]
+model User {
+  id        String     @id @default(cuid())
+  username  String
+  password  String
+  email     String?
+  rooms     RoomUser[]
+  createdAt DateTime   @default(now())
+  RoomOwner Room[]
 }
 
-model Room{
-  id String @id @default(cuid())
-  name String
-  password String
-  users RoomUser[]
+model Room {
+  id          String     @id @default(cuid())
+  RoomOwnerId String
+  RoomOwner   User       @relation(fields: [RoomOwnerId], references: [id])
+  name        String
+  password    String
+  gametext    String     @default("")
+  users       RoomUser[]
 }
 
-model RoomUser{
-  id String @id @default(cuid())
+model RoomUser {
+  id     String @id @default(cuid())
   userId String
   roomId String
-  user User @relation(fields: [userId], references: [id])
-  room Room @relation(fields: [roomId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  room   Room   @relation(fields: [roomId], references: [id])
 }
