@@ -3,11 +3,12 @@ import { resultAtom } from "@/states/atoms/result";
 import {
   challengeAtom,
   isDataAtom,
+  letterArrayAtom,
   wordDataAtom,
   wordsAtom,
 } from "@/states/atoms/words";
 import { useEffect, useRef, useState } from "react";
-import { selector, useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import {
@@ -29,23 +30,23 @@ export default function TypingComponent() {
   const [fetch, setFetch] = useState(false);
   const [maxWrong, setMaxWrong] = useState(0);
   const [totaltype, setTotaltype] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [cursorIndex, setCursorIndex] = useState(0);
   const [wrongInputs, setwrongInputs] = useState(0);
-  const preference = useRecoilValue(preferenceAtom);
   const [correctInput, setCorrectInput] = useState(0);
   const [isgameOver, setIsgameOver] = useState(false);
   const [result, setResult] = useRecoilState(resultAtom);
   const [isData, setIsData] = useRecoilState(isDataAtom);
+  const [roomOwner, setRoomOwner] = useRecoilState(roomownerAtom);
   const [textstring, setTextstring] = useRecoilState(wordsAtom);
   const [wordsData, setWordsData] = useRecoilState(wordDataAtom);
-  const [roomOwner, setRoomOwner] = useRecoilState(roomownerAtom);
   const [startTime, setStartTime] = useState<number | null>(null);
-  const [letterarray, setLetterarray] = useState<LetterProps[]>([]);
-  const [charCustom, setCharCustom] = useRecoilState(charCustomAtom);
-  const [customReady, setCustomReady] = useRecoilState(customReadyAtom);
-  const [users, setUsers] = useRecoilState(challengeUsers);
-
+  const [letterarray, setLetterarray] = useRecoilState(letterArrayAtom);
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const preference = useRecoilValue(preferenceAtom);
+  const charCustom = useRecoilValue(charCustomAtom);
+  const setUsers = useSetRecoilState(challengeUsers);
+  const customReady = useRecoilValue(customReadyAtom);
 
   //Fetching the words from the backend and setting them into recoil state and persisting it into local storage
   useEffect(() => {
@@ -63,32 +64,36 @@ export default function TypingComponent() {
     }
   }, [session, isData]);
 
+  //Challenge mode logic
   useEffect(() => {
     if (preference.mode === "challenge" && session?.data?.user) {
       const ws = new WebSocket("ws://localhost:8080");
-      let stringtemp = ""
+      setSocket(ws);
+      let stringtemp = "";
       let common_words = wordsData.common_words;
       for (let i = 0; i < 10; i++) {
         let randomIndex = Math.floor(Math.random() * common_words.length);
         stringtemp += common_words[randomIndex] + " ";
       }
+      //Sending the user details along with the words randomly generated but backend will only proceed with oweners words
       ws.onopen = () => {
-        ws.send(JSON.stringify({
-          action: "joinRoom",
-          payload: {
-            roomId: window.location.pathname.split("/")[2],
-            userId: session.data.user.id,
-            word: stringtemp
-          }
-        }))
-      }
+        ws.send(
+          JSON.stringify({
+            action: "joinRoom",
+            payload: {
+              roomId: window.location.pathname.split("/")[2],
+              userId: session.data.user.id,
+              word: stringtemp,
+            },
+          })
+        );
+      };
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         if (data.action === "userJoined") {
           setUsers(data.payload.users);
-          setRoomOwner(data.payload.roomOwner)
+          setRoomOwner(data.payload.roomOwner);
           stringtemp = data.payload.words;
-          console.log(stringtemp);
           let wordsstring = stringtemp.trim();
           setTextstring(wordsstring);
           let temparray = Array.from(wordsstring).map((char) => ({
@@ -98,11 +103,9 @@ export default function TypingComponent() {
           setLetterarray(temparray);
           setFetch(true);
         }
-      }
-
-
+      };
     }
-  }, [session])
+  }, [session]);
 
   //Generating the words for the test
   useEffect(() => {
@@ -140,7 +143,7 @@ export default function TypingComponent() {
       const selectedWords = filteredWords.slice(0, maxWords);
       stringtemp = selectedWords.join(" ") + " ";
     }
-    console.log(stringtemp)
+    console.log(stringtemp);
     let wordsstring = stringtemp.trim();
     setTextstring(wordsstring);
     let temparray = Array.from(wordsstring).map((char) => ({
@@ -213,7 +216,41 @@ export default function TypingComponent() {
     if (event.key === "Tab") {
       event.preventDefault();
     }
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && preference.mode !== "challenge") {
+      setFetch(!fetch);
+      setCursorIndex(0);
+      setStartTime(0);
+      setIsgameOver(false);
+      setCorrectInput(0);
+      setwrongInputs(0);
+      setMaxWrong(0);
+      setResult({ accuracy: "0", speed: "0", rawspeed: "0" });
+      setTotaltype(0);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+
+    if (
+      event.key === "Enter" &&
+      preference.mode === "challenge" &&
+      roomOwner === session?.data?.user.id
+    ) {
+      let stringtemp = "";
+      let common_words = wordsData.common_words;
+      for (let i = 0; i < 10; i++) {
+        let randomIndex = Math.floor(Math.random() * common_words.length);
+        stringtemp += common_words[randomIndex] + " ";
+      }
+      socket?.send(
+        JSON.stringify({
+          action: "joinRoom",
+          payload: {
+            roomId: window.location.pathname.split("/")[2],
+            userId: session.data.user.id,
+            word: stringtemp,
+          },
+        })
+      );
+      console.log("hello");
       setFetch(!fetch);
       setCursorIndex(0);
       setStartTime(0);

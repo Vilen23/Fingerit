@@ -5,6 +5,7 @@ const { persistAtom } = recoilPersist();
 export const wordsAtom = atom({
   key: "wordsAtom",
   default: "",
+  effects_UNSTABLE: [persistAtom],
 });
 
 export const wordDataAtom = atom({
@@ -24,4 +25,14 @@ export const isDataAtom = atom({
 export const challengeAtom = atom({
   key: "challengeAtom",
   default: "",
+});
+
+interface LetterProps {
+  letter: string;
+  color: string;
+}
+
+export const letterArrayAtom = atom<LetterProps[]>({
+  key: "letterArrayAtom",
+  default: [],
 });
