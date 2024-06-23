@@ -2,5 +2,10 @@ import { atom } from "recoil";
 
 export const challengeUsers = atom({
   key: "challengeUsers",
-  default: []
-})
+  default: [],
+});
+
+export const challengeStartAtom = atom({
+  key: "challengeStart",
+  default: false,
+});

@@ -19,7 +19,8 @@ import {
 import "./cursorblink.css";
 import ResultCard from "./ResultCard";
 import { roomownerAtom } from "@/states/atoms/roomowner";
-import { challengeUsers } from "@/states/atoms/challenge";
+import { challengeStartAtom, challengeUsers } from "@/states/atoms/challenge";
+import { socketAtom } from "@/states/atoms/socket";
 interface LetterProps {
   letter: string;
   color: string;
@@ -41,7 +42,9 @@ export default function TypingComponent() {
   const [wordsData, setWordsData] = useRecoilState(wordDataAtom);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [letterarray, setLetterarray] = useRecoilState(letterArrayAtom);
-  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [socket, setSocket] = useRecoilState(socketAtom);
+  const [challengeStart, setChallengeStart] =
+    useRecoilState(challengeStartAtom);
   const inputRef = useRef<HTMLInputElement>(null);
   const preference = useRecoilValue(preferenceAtom);
   const charCustom = useRecoilValue(charCustomAtom);
@@ -63,6 +66,13 @@ export default function TypingComponent() {
       getData();
     }
   }, [session, isData]);
+
+  useEffect(() => {
+    if (preference.mode === "challenge" && challengeStart) {
+      console.log("heer");
+      inputRef.current?.focus();
+    }
+  }, [challengeStart]);
 
   //Challenge mode logic
   useEffect(() => {
@@ -143,7 +153,6 @@ export default function TypingComponent() {
       const selectedWords = filteredWords.slice(0, maxWords);
       stringtemp = selectedWords.join(" ") + " ";
     }
-    console.log(stringtemp);
     let wordsstring = stringtemp.trim();
     setTextstring(wordsstring);
     let temparray = Array.from(wordsstring).map((char) => ({
@@ -155,7 +164,7 @@ export default function TypingComponent() {
   }, [session.data, preference, fetch, customReady]);
 
   useEffect(() => {
-    if (inputRef.current && customReady) {
+    if (inputRef.current && customReady && preference.mode !== "challenge") {
       inputRef.current.focus();
     }
   }, [preference, customReady]);
@@ -213,7 +222,7 @@ export default function TypingComponent() {
   };
 
   const handleKeyPresses = (event: any) => {
-    if (event.key === "Tab") {
+    if (event.key === "Tab" || event.key === "Escape") {
       event.preventDefault();
     }
     if (event.key === "Enter" && preference.mode !== "challenge") {
@@ -234,33 +243,10 @@ export default function TypingComponent() {
       preference.mode === "challenge" &&
       roomOwner === session?.data?.user.id
     ) {
-      let stringtemp = "";
-      let common_words = wordsData.common_words;
-      for (let i = 0; i < 10; i++) {
-        let randomIndex = Math.floor(Math.random() * common_words.length);
-        stringtemp += common_words[randomIndex] + " ";
+      if (socket?.readyState === 1) {
+        socket.send(JSON.stringify({ action: "reload" }));
+        
       }
-      socket?.send(
-        JSON.stringify({
-          action: "joinRoom",
-          payload: {
-            roomId: window.location.pathname.split("/")[2],
-            userId: session.data.user.id,
-            word: stringtemp,
-          },
-        })
-      );
-      console.log("hello");
-      setFetch(!fetch);
-      setCursorIndex(0);
-      setStartTime(0);
-      setIsgameOver(false);
-      setCorrectInput(0);
-      setwrongInputs(0);
-      setMaxWrong(0);
-      setResult({ accuracy: "0", speed: "0", rawspeed: "0" });
-      setTotaltype(0);
-      if (inputRef.current) inputRef.current.value = "";
     }
 
     //To make backspace only work when wrong input and not let any other input come
@@ -282,7 +268,11 @@ export default function TypingComponent() {
     );
 
   return (
-    <div className="flex justify-center items-center flex-col h-[60vh]">
+    <div
+      className={`flex justify-center items-center flex-col ${
+        preference.mode === "challenge" ? "h-[40vh]" : "h-[60vh]"
+      } `}
+    >
       <div className="text-[30px] relative w-[80vw] text-center">
         {letterarray.map((word, index) => (
           <span
@@ -299,6 +289,7 @@ export default function TypingComponent() {
       <input
         ref={inputRef}
         autoFocus
+        disabled={!challengeStart}
         type="text"
         placeholder=""
         onKeyDown={handleKeyPresses}
