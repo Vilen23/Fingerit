@@ -5,13 +5,12 @@ import { WebSocketServer, WebSocket } from "ws";
 import authRouter from "./routes/auth-routes";
 import roomRouter from "./routes/room-routes";
 import dataRouter from "./routes/data-routes";
-import challengeRouter from "./routes/challenge-routes"
+import challengeRouter from "./routes/challenge-routes";
 
 const app = express();
 const httpServer = app.listen(8080);
 app.use(express.json());
 app.use(cors());
-
 
 app.use("/auth", authRouter);
 app.use("/room", roomRouter);
@@ -25,7 +24,7 @@ export interface CustomWebSocket extends WebSocket {
 
 const wss = new WebSocketServer({ server: httpServer });
 export const rooms: { [key: string]: Set<CustomWebSocket> } = {};
-app.set('wss', wss);
+app.set("wss", wss);
 wss.on("connection", (ws: CustomWebSocket) => {
   ws.on("error", console.error);
 
@@ -33,7 +32,6 @@ wss.on("connection", (ws: CustomWebSocket) => {
     const { action, payload } = JSON.parse(message.toString());
     switch (action) {
       case "joinRoom":
-        console.log("someone hopped up");
         const { roomId, userId, word } = payload;
         if (!rooms[roomId]) {
           rooms[roomId] = new Set();
@@ -53,7 +51,23 @@ wss.on("connection", (ws: CustomWebSocket) => {
         });
         if (room?.RoomOwnerId === ws.userId) {
           ws.words = word;
+          const gametext = await db.room.update({
+            where: {
+              id: roomId,
+            },
+            data: {
+              gametext: word,
+            },
+          });
         }
+        const gametext = await db.room.findFirst({
+          where: {
+            id: roomId,
+          },
+          select: {
+            gametext: true,
+          },
+        });
         const usersId = roomusers.map((user) => user.userId);
         const users = await db.user.findMany({
           where: {
@@ -78,7 +92,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
                   users: users,
                   roomOwner: room?.RoomOwnerId,
                   room: room,
-                  words: ws.words
+                  words: ws.words || gametext?.gametext,
                 },
               })
             );
@@ -126,4 +140,3 @@ wss.on("connection", (ws: CustomWebSocket) => {
     }
   });
 });
-
