@@ -5,7 +5,6 @@ import { WebSocketServer, WebSocket } from "ws";
 import authRouter from "./routes/auth-routes";
 import roomRouter from "./routes/room-routes";
 import dataRouter from "./routes/data-routes";
-import challengeRouter from "./routes/challenge-routes";
 
 const app = express();
 const httpServer = app.listen(8080);
@@ -15,7 +14,6 @@ app.use(cors());
 app.use("/auth", authRouter);
 app.use("/room", roomRouter);
 app.use("/getData", dataRouter);
-app.use("/challenge", challengeRouter);
 export interface CustomWebSocket extends WebSocket {
   userId?: string;
   roomId?: string;
@@ -99,30 +97,34 @@ wss.on("connection", (ws: CustomWebSocket) => {
           }
         });
         break;
-      case "setWords":
-        console.log("someone sent words");
-        const { roomid, words } = payload;
-        if (words) rooms[words] = words;
-        console.log(words);
-        if (rooms[roomid]) {
+      case "start":
+        console.log("start");
+        const roomid = ws.roomId;
+        if (roomid && rooms[roomid]) {
           rooms[roomid].forEach((client) => {
-            console.log(client.userId);
+            console.log("jayga");
             if (client !== ws && client.readyState === WebSocket.OPEN) {
-              client.send(
-                JSON.stringify({ action: "getWords", payload: words })
-              );
+              client.send(JSON.stringify({ action: "start" }));
             }
           });
         }
         break;
-      case "checking":
-        console.log("wroking");
+      case "reload":
+        console.log("reload")
+        const roomidReload = ws.roomId;
+        if (roomidReload && rooms[roomidReload]) {
+          rooms[roomidReload].forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(JSON.stringify({ action: "reload" }));
+            }
+          });
+        }
         break;
       case "typingSpeed":
         const { roomId: typingRomId, speed } = payload;
         if (rooms[typingRomId]) {
           rooms[typingRomId].forEach((client) => {
-            if (client !== ws && client.readyState === WebSocket.OPEN) {
+            if (client.readyState === WebSocket.OPEN) {
               client.send(JSON.stringify({ userId: ws.userId, speed }));
             }
           });
