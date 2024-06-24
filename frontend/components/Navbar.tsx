@@ -67,6 +67,7 @@ export default function () {
                   redirect: true,
                   callbackUrl: "/",
                 });
+                localStorage.removeItem("recoil-persist")
               }}
             />
           )}

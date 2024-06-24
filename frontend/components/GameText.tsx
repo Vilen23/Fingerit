@@ -30,11 +30,13 @@ export default function TypingComponent() {
   const session = useSession();
   const [fetch, setFetch] = useState(false);
   const [maxWrong, setMaxWrong] = useState(0);
+  const [liveSpeed, setLiveSpeed] = useState(0);
   const [totaltype, setTotaltype] = useState(0);
   const [cursorIndex, setCursorIndex] = useState(0);
   const [wrongInputs, setwrongInputs] = useState(0);
   const [correctInput, setCorrectInput] = useState(0);
   const [isgameOver, setIsgameOver] = useState(false);
+  const [socket, setSocket] = useRecoilState(socketAtom);
   const [result, setResult] = useRecoilState(resultAtom);
   const [isData, setIsData] = useRecoilState(isDataAtom);
   const [roomOwner, setRoomOwner] = useRecoilState(roomownerAtom);
@@ -42,7 +44,6 @@ export default function TypingComponent() {
   const [wordsData, setWordsData] = useRecoilState(wordDataAtom);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [letterarray, setLetterarray] = useRecoilState(letterArrayAtom);
-  const [socket, setSocket] = useRecoilState(socketAtom);
   const [challengeStart, setChallengeStart] =
     useRecoilState(challengeStartAtom);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -55,8 +56,8 @@ export default function TypingComponent() {
   useEffect(() => {
     if (session.data && !isData) {
       const getData = async () => {
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/getData`
+        const response = await axios.get(`
+          ${process.env.NEXT_PUBLIC_API_URL} / getData`
         );
         if (response.status === 200) {
           setWordsData(response.data.words);
@@ -75,6 +76,8 @@ export default function TypingComponent() {
   }, [challengeStart]);
 
   //Challenge mode logic
+
+
   useEffect(() => {
     if (preference.mode === "challenge" && session?.data?.user) {
       const ws = new WebSocket("ws://localhost:8080");
@@ -112,10 +115,14 @@ export default function TypingComponent() {
           }));
           setLetterarray(temparray);
           setFetch(true);
+        } else if (data.action === "speed") {
+          console.log(data.payload);
         }
       };
     }
   }, [session]);
+
+
 
   //Generating the words for the test
   useEffect(() => {
@@ -201,23 +208,31 @@ export default function TypingComponent() {
     setLetterarray(newarray);
     setwrongInputs(newWrongInput);
 
+    if (!startTime) return;
+    const curr = new Date().getTime();
+    const accuracy =
+      ((textstring.length - maxWrong - 1) / (textstring.length - 1)) * 100;
+    const timeElapsed = (curr - startTime) / 1000 / 60;
+    const rawspeed = Math.max(0, Math.round(totaltype / 5 / timeElapsed));
+    const wordsTyped = correctInput / 5;
+    const wpm = wordsTyped / timeElapsed;
+    const speed = Math.max(0, Math.round(wpm));
+    //Sending live speed to the websocket in challenge mode
+    if (socket?.OPEN && preference.mode === "challenge") {
+      socket.send(
+        JSON.stringify({
+          action: "speed",
+          payload: { speed: speed, user: session?.data?.user },
+        })
+      );
+    }
     if (cursorIndex === textstring.length - 1) {
-      if (!startTime) return;
-      const curr = new Date().getTime();
-      const accuracy =
-        ((textstring.length - maxWrong - 1) / (textstring.length - 1)) * 100;
-      const timeElapsed = (curr - startTime) / 1000 / 60;
-      const rawspeed = Math.max(0, Math.round(totaltype / 5 / timeElapsed));
-      const wordsTyped = correctInput / 5;
-      const wpm = wordsTyped / timeElapsed;
-      const speed = Math.max(0, Math.round(wpm));
-
+      setIsgameOver(true);
       setResult({
         accuracy: accuracy.toFixed(2),
         speed: speed.toString(),
         rawspeed: rawspeed.toString(),
       });
-      setIsgameOver(true);
     }
   };
 
@@ -245,7 +260,6 @@ export default function TypingComponent() {
     ) {
       if (socket?.readyState === 1) {
         socket.send(JSON.stringify({ action: "reload" }));
-        
       }
     }
 
@@ -269,9 +283,8 @@ export default function TypingComponent() {
 
   return (
     <div
-      className={`flex justify-center items-center flex-col ${
-        preference.mode === "challenge" ? "h-[40vh]" : "h-[60vh]"
-      } `}
+      className={`flex justify-center items-center flex-col ${preference.mode === "challenge" ? "h-[40vh]" : "h-[60vh]"
+        } `}
     >
       <div className="text-[30px] relative w-[80vw] text-center">
         {letterarray.map((word, index) => (
@@ -289,7 +302,7 @@ export default function TypingComponent() {
       <input
         ref={inputRef}
         autoFocus
-        disabled={!challengeStart}
+        disabled={!challengeStart && preference.mode === "challenge"}
         type="text"
         placeholder=""
         onKeyDown={handleKeyPresses}

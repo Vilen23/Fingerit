@@ -3,11 +3,12 @@ import GameText from "@/components/GameText";
 import { challengeStartAtom, challengeUsers } from "@/states/atoms/challenge";
 import { roomownerAtom } from "@/states/atoms/roomowner";
 import { socketAtom } from "@/states/atoms/socket";
-import { challengeAtom } from "@/states/atoms/words";
 import { useSession } from "next-auth/react";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaCrown } from "react-icons/fa";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+
+//TODO : undefined on first login or router push to practise
 
 export default function ChallengeRoom() {
   const session = useSession();
