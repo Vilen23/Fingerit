@@ -18,6 +18,7 @@ export interface CustomWebSocket extends WebSocket {
   userId?: string;
   roomId?: string;
   words?: string;
+  speed?: number;
 }
 
 const wss = new WebSocketServer({ server: httpServer });
@@ -30,13 +31,22 @@ wss.on("connection", (ws: CustomWebSocket) => {
     const { action, payload } = JSON.parse(message.toString());
     switch (action) {
       case "joinRoom":
+        console.log("hopped up")
         const { roomId, userId, word } = payload;
         if (!rooms[roomId]) {
           rooms[roomId] = new Set();
         }
+        // Array.from(rooms[roomId]).forEach((client) => {
+        //   if (client.userId === userId && client.readyState === WebSocket.OPEN) {
+        //     client.close();
+        //     rooms[roomId].delete(client)
+        //   }
+        // })
+
         rooms[roomId].add(ws);
         ws.roomId = roomId;
         ws.userId = userId;
+        ws.speed = 0;
         const roomusers = await db.roomUser.findMany({
           where: {
             roomId: roomId,
@@ -56,6 +66,9 @@ wss.on("connection", (ws: CustomWebSocket) => {
             data: {
               gametext: word,
             },
+            select: {
+              gametext: true
+            }
           });
         }
         const gametext = await db.room.findFirst({
@@ -81,6 +94,8 @@ wss.on("connection", (ws: CustomWebSocket) => {
           },
         });
         if (!rooms[roomId]) return;
+        console.log(rooms[roomId].size);
+
         rooms[roomId].forEach((client) => {
           if (client !== ws && client.readyState === WebSocket.OPEN) {
             client.send(
@@ -98,11 +113,9 @@ wss.on("connection", (ws: CustomWebSocket) => {
         });
         break;
       case "start":
-        console.log("start");
         const roomid = ws.roomId;
         if (roomid && rooms[roomid]) {
           rooms[roomid].forEach((client) => {
-            console.log("jayga");
             if (client !== ws && client.readyState === WebSocket.OPEN) {
               client.send(JSON.stringify({ action: "start" }));
             }
@@ -110,7 +123,6 @@ wss.on("connection", (ws: CustomWebSocket) => {
         }
         break;
       case "reload":
-        console.log("reload")
         const roomidReload = ws.roomId;
         if (roomidReload && rooms[roomidReload]) {
           rooms[roomidReload].forEach((client) => {
@@ -120,15 +132,34 @@ wss.on("connection", (ws: CustomWebSocket) => {
           });
         }
         break;
-      case "typingSpeed":
-        const { roomId: typingRomId, speed } = payload;
-        if (rooms[typingRomId]) {
-          rooms[typingRomId].forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify({ userId: ws.userId, speed }));
-            }
-          });
+      case "speed":
+        const { speed } = payload;
+        if (speed) {
+          ws.speed = speed;
         }
+        if (!ws.roomId) return;
+        const usersInChallenge = await db.roomUser.findMany({
+          where: {
+            roomId: ws.roomId,
+          },
+        });
+        const usersInChallengeMap = new Map();
+        usersInChallenge.map((user) => {
+          usersInChallengeMap.set(user.userId, user);
+        });
+        console.log(usersInChallengeMap)
+        const roomDetails = Array.from(rooms[ws.roomId]).map((client) => ({
+          speed: client.speed,
+          user: usersInChallengeMap.get(client.userId),
+        }));
+        console.log(roomDetails)
+        rooms[ws.roomId].forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(
+              JSON.stringify({ action: "speed", payload: roomDetails })
+            );
+          }
+        });
         break;
     }
   });
@@ -142,3 +173,5 @@ wss.on("connection", (ws: CustomWebSocket) => {
     }
   });
 });
+
+
