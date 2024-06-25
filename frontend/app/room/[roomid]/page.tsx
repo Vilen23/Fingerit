@@ -39,7 +39,7 @@ export default function ChallengeRoom() {
     ) {
       socket.send(JSON.stringify({ action: "start" }));
     }
-  }, [timerStart]);
+  }, [timerStart,roomOwner,session?.data?.user.id,socket]);
 
   useEffect(() => {
     if (socket) {
@@ -58,7 +58,7 @@ export default function ChallengeRoom() {
         }
       };
     }
-  }, [socket]);
+  }, [socket, setChallengeStart]);
 
   if (!session?.data?.user) return <div>Loading...</div>;
   return (

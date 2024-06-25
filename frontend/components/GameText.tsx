@@ -85,13 +85,13 @@ export default function TypingComponent() {
       };
       getData();
     }
-  }, [session, isData]);
+  }, [session, isData, setWordsData, setIsData]);
 
   useEffect(() => {
     if (preference.mode === "challenge" && challengeStart) {
       inputRef.current?.focus();
     }
-  }, [challengeStart]);
+  }, [challengeStart, preference.mode]);
 
   //Challenge mode logic
   useEffect(() => {
@@ -136,7 +136,7 @@ export default function TypingComponent() {
         }
       };
     }
-  }, [session]);
+  }, [session, preference.mode, wordsData.common_words, setLetterarray, setFetch, setUsersSpeed, setUsers, setRoomOwner, socket]);
 
   //Generating the words for the test
   useEffect(() => {
@@ -183,13 +183,13 @@ export default function TypingComponent() {
     }));
     setLetterarray(temparray);
     setFetch(true);
-  }, [session.data, preference, fetch, customReady]);
+  }, [session.data, preference, fetch, customReady, charCustom, wordsData.common_words, setLetterarray, setTextstring, setResult]);
 
   useEffect(() => {
     if (inputRef.current && (customReady || preference.mode !== "challenge")) {
       inputRef.current.focus();
     }
-  }, [preference, customReady]);
+  }, [preference, customReady, inputRef.current]);
 
   const handleInputChange = (event: any) => {
     let ans = event.target.value;
