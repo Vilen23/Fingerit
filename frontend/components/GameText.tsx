@@ -71,7 +71,7 @@ export default function TypingComponent() {
   const [users, setUsers] = useRecoilState(challengeUsers);
   const customReady = useRecoilValue(customReadyAtom);
   const [usersSpeed, setUsersSpeed] = useState<userSpeedProps[]>([]);
-  
+
   //Fetching the words from the backend and setting them into recoil state and persisting it into local storage
   useEffect(() => {
     if (session.data && !isData) {
@@ -136,7 +136,19 @@ export default function TypingComponent() {
         }
       };
     }
-  }, [session, preference.mode, wordsData.common_words, setLetterarray, setFetch, setUsersSpeed, setUsers, setRoomOwner, socket]);
+  }, [
+    session,
+    preference.mode,
+    wordsData.common_words,
+    setLetterarray,
+    setFetch,
+    setUsersSpeed,
+    setUsers,
+    setRoomOwner,
+    socket,
+    setSocket,
+    setTextstring,
+  ]);
 
   //Generating the words for the test
   useEffect(() => {
@@ -183,7 +195,17 @@ export default function TypingComponent() {
     }));
     setLetterarray(temparray);
     setFetch(true);
-  }, [session.data, preference, fetch, customReady, charCustom, wordsData.common_words, setLetterarray, setTextstring, setResult]);
+  }, [
+    session.data,
+    preference,
+    fetch,
+    customReady,
+    charCustom,
+    wordsData.common_words,
+    setLetterarray,
+    setTextstring,
+    setResult,
+  ]);
 
   useEffect(() => {
     if (inputRef.current && (customReady || preference.mode !== "challenge")) {
