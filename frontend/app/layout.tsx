@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import { Navbar } from "@/components/Navbar";
 import { Providers } from "@/lib/providers";
 
 const inter = Roboto_Mono({ subsets: ["latin"], weight: "400" });
