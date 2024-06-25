@@ -6,7 +6,7 @@ import { signOut, useSession } from "next-auth/react";
 import { MdLogout } from "react-icons/md";
 import { useRouter } from "next/navigation";
 
-export default function () {
+export const Navbar = () => {
   const session = useSession();
   const router = useRouter();
   const [logoutHover, setLogoutHover] = useState(false);
@@ -67,7 +67,7 @@ export default function () {
                   redirect: true,
                   callbackUrl: "/",
                 });
-                localStorage.removeItem("recoil-persist")
+                localStorage.removeItem("recoil-persist");
               }}
             />
           )}
@@ -80,4 +80,4 @@ export default function () {
       </div>
     </div>
   );
-}
+};

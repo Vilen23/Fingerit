@@ -16,7 +16,7 @@ import {
   preferenceAtom,
 } from "@/states/atoms/preference";
 import "./cursorblink.css";
-import ResultCard from "./ResultCard";
+import {ResultCard} from "./ResultCard";
 import { roomownerAtom } from "@/states/atoms/roomowner";
 import { challengeStartAtom, challengeUsers } from "@/states/atoms/challenge";
 import { socketAtom } from "@/states/atoms/socket";
@@ -47,7 +47,7 @@ interface GameTextProps {
   };
   totaltype: number;
 }
-export default function TypingComponent() {
+export const TypingComponent = () => {
   const session = useSession();
   const [fetch, setFetch] = useState(false);
   const [maxWrong, setMaxWrong] = useState(0);
@@ -380,7 +380,9 @@ export default function TypingComponent() {
                         (a: userSpeedProps, b: userSpeedProps) =>
                           b.speed - a.speed
                       )
-                      .map((user: userSpeedProps) => <p key={user.speed}>{user.speed}</p>)
+                      .map((user: userSpeedProps) => (
+                        <p key={user.speed}>{user.speed}</p>
+                      ))
                   ) : (
                     <p>0</p>
                   )}
@@ -428,4 +430,4 @@ export default function TypingComponent() {
       </div>
     </div>
   );
-}
+};

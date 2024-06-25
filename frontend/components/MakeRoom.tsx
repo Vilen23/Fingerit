@@ -16,7 +16,7 @@ interface FormTypeProps {
   joinroom: boolean;
 }
 
-export default function () {
+export const MakeRoom = () => {
   const [room, setRoom] = useState<RoomProps>({
     roomname: "",
     password: "",
@@ -152,4 +152,4 @@ export default function () {
       </motion.div>
     </div>
   );
-}
+};

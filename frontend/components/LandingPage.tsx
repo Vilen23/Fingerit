@@ -1,11 +1,10 @@
-import React from 'react'
-import LoginPage from './LoginPage'
+import React from "react";
+import { LoginPage } from "./LoginPage";
 
-export default function () {
+export const LandingPage = () => {
   return (
     <div>
       <LoginPage />
     </div>
-  )
-}
-
+  );
+};

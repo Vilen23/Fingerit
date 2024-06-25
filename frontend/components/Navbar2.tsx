@@ -9,7 +9,7 @@ import { HiMiniWrenchScrewdriver } from "react-icons/hi2";
 import { TiSortAlphabetically } from "react-icons/ti";
 import { useRecoilState } from "recoil";
 import { FaCheckCircle, FaCrown } from "react-icons/fa";
-import { easeInOut, motion } from "framer-motion"
+import { easeInOut, motion } from "framer-motion";
 import { RxDividerVertical } from "react-icons/rx";
 
 export interface ModesProps {
@@ -19,7 +19,7 @@ export interface ModesProps {
 }
 const modeValue = [10, 15, 30];
 
-export default function Navbar2() {
+export const Navbar2 = () => {
   const [preference, setPreference] = useRecoilState(preferenceAtom);
   const [charCustom, setCharCustom] = useRecoilState(charCustomAtom);
   const [error, setError] = useState("");
@@ -31,7 +31,7 @@ export default function Navbar2() {
       setError("Cannot exceed 4 cgharacters");
       return;
     }
-    setCustomReady(false)
+    setCustomReady(false);
     setCharCustom(e.target.value);
   };
 
@@ -61,8 +61,9 @@ export default function Navbar2() {
           onClick={() => {
             setPreference({ ...preference, mode: "challenge" });
           }}
-          className={`${preference.mode === "challenge" ? "text-[#F99B32]" : "opacity-50"
-            } flex items-center text-xs gap-1 0 hover:opacity-100 cursor-pointer transition-all duration-200`}
+          className={`${
+            preference.mode === "challenge" ? "text-[#F99B32]" : "opacity-50"
+          } flex items-center text-xs gap-1 0 hover:opacity-100 cursor-pointer transition-all duration-200`}
         >
           <FaCrown size={20} />
           challenge
@@ -71,8 +72,9 @@ export default function Navbar2() {
           onClick={() => {
             setPreference({ ...preference, mode: "words" });
           }}
-          className={`${preference.mode === "words" ? "text-[#F99B32]" : "opacity-50"
-            } flex items-center text-xs gap-1  hover:opacity-100 cursor-pointer transition-all duration-200`}
+          className={`${
+            preference.mode === "words" ? "text-[#F99B32]" : "opacity-50"
+          } flex items-center text-xs gap-1  hover:opacity-100 cursor-pointer transition-all duration-200`}
         >
           <TiSortAlphabetically size={30} />
           words
@@ -81,25 +83,24 @@ export default function Navbar2() {
           onClick={() => {
             setPreference({ ...preference, mode: "custom" });
           }}
-          className={`${preference.mode === "custom" ? "text-[#F99B32]" : "opacity-50"
-            } flex items-center text-xs gap-1  hover:opacity-100 cursor-pointer transition-all duration-200`}
+          className={`${
+            preference.mode === "custom" ? "text-[#F99B32]" : "opacity-50"
+          } flex items-center text-xs gap-1  hover:opacity-100 cursor-pointer transition-all duration-200`}
         >
           <HiMiniWrenchScrewdriver size={20} />
           custom
         </div>
       </div>
-      {preference.mode !== "challenge" &&
+      {preference.mode !== "challenge" && (
         <motion.div
           initial={{ x: "-100px", opacity: "0" }}
           animate={{ x: "0", opacity: "100" }}
           transition={{ duration: 0.5, type: easeInOut }}
           exit={{ x: "-100px", opacity: "0" }}
-          className="flex z-10">
+          className="flex z-10"
+        >
           <RxDividerVertical size={40} />
-          <motion.div
-
-            className="flex bg-[#1D2021] h-[40px] items-center px-4 rounded-lg gap-2 text-xs">
-
+          <motion.div className="flex bg-[#1D2021] h-[40px] items-center px-4 rounded-lg gap-2 text-xs">
             {modeValue.map((item, index) => {
               return (
                 <p
@@ -107,10 +108,9 @@ export default function Navbar2() {
                   onClick={() => {
                     handlePreferenceValue(item);
                   }}
-                  className={`${preference.value === item
-                    ? "text-[#F99B32]"
-                    : "opacity-50"
-                    } transition-all duration-200 cursor-pointer hover:opacity-100`}
+                  className={`${
+                    preference.value === item ? "text-[#F99B32]" : "opacity-50"
+                  } transition-all duration-200 cursor-pointer hover:opacity-100`}
                 >
                   {item}
                 </p>
@@ -118,13 +118,14 @@ export default function Navbar2() {
             })}
           </motion.div>
         </motion.div>
-      }
-      {
-        preference.mode === "custom" && <motion.div
+      )}
+      {preference.mode === "custom" && (
+        <motion.div
           initial={{ x: "-100px", opacity: "0" }}
           animate={{ x: "0px", opacity: "100" }}
           transition={{ duration: 0.5, type: easeInOut }}
-          className="flex items-center gap-2 z-[0]">
+          className="flex items-center gap-2 z-[0]"
+        >
           <RxDividerVertical size={40} />
           <div className="rounded-lg flex gap-2 items-center h-[40px] px-8 bg-[#1D2021] ">
             <input
@@ -135,13 +136,15 @@ export default function Navbar2() {
               className="bg-[#1C2022] border-b-[1px] border-[#F6D99A]/40 transition-all duration-200 focus:border-[#F6D99A] px-2 py-[1px] text-xs outline-none w-[150px] "
             />
             <FaCheckCircle
-              className={` ${customReady ? "opacity-100 text-[#FF8F00]" : "opacity-50"
-                } hover:opacity-100 transition-all duration-200 cursor-pointer`}
+              className={` ${
+                customReady ? "opacity-100 text-[#FF8F00]" : "opacity-50"
+              } hover:opacity-100 transition-all duration-200 cursor-pointer`}
               onClick={handleCustomText}
-            /></div>
+            />
+          </div>
         </motion.div>
-      }
+      )}
       {error && <p className="text-red-500 text-xs">{error}</p>}
-    </div >
+    </div>
   );
-}
+};

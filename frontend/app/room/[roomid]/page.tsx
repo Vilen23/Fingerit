@@ -1,5 +1,5 @@
 "use client";
-import GameText from "@/components/GameText";
+import { TypingComponent } from "@/components/GameText";
 import { challengeStartAtom, challengeUsers } from "@/states/atoms/challenge";
 import { roomownerAtom } from "@/states/atoms/roomowner";
 import { socketAtom } from "@/states/atoms/socket";
@@ -39,7 +39,7 @@ export default function ChallengeRoom() {
     ) {
       socket.send(JSON.stringify({ action: "start" }));
     }
-  }, [timerStart,roomOwner,session?.data?.user.id,socket]);
+  }, [timerStart, roomOwner, session?.data?.user.id, socket]);
 
   useEffect(() => {
     if (socket) {
@@ -97,7 +97,7 @@ export default function ChallengeRoom() {
         )}
         {timerStart && <p className="text-white">{timer}s</p>}
       </div>
-      <GameText />
+      <TypingComponent />
     </div>
   );
 }
