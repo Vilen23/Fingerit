@@ -369,7 +369,7 @@ export default function TypingComponent() {
           <div className="flex flex-col gap-2">
             {users.map((users: any) => {
               return (
-                <div className="flex gap-4">
+                <div key={users.id} className="flex gap-4">
                   <p className="font-semibold">{users.username}</p>
                   {usersSpeed ? (
                     usersSpeed
@@ -380,7 +380,7 @@ export default function TypingComponent() {
                         (a: userSpeedProps, b: userSpeedProps) =>
                           b.speed - a.speed
                       )
-                      .map((user: userSpeedProps) => <p>{user.speed}</p>)
+                      .map((user: userSpeedProps) => <p key={user.speed}>{user.speed}</p>)
                   ) : (
                     <p>0</p>
                   )}
