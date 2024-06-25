@@ -5,7 +5,7 @@ import { preferenceAtom } from '@/states/atoms/preference'
 import React from 'react'
 import { useRecoilValue } from 'recoil'
 
-export default function page() {
+export default function Page() {
   const preference = useRecoilValue(preferenceAtom);
   return (
     <div>

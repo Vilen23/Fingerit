@@ -8,15 +8,13 @@ import { useEffect, useRef, useState } from "react";
 import { FaCrown } from "react-icons/fa";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
-//TODO : undefined on first login or router push to practise
-
 export default function ChallengeRoom() {
   const session = useSession();
   const [timer, setTimer] = useState(5);
   const [timerStart, setTimerStart] = useState(false);
   const socket = useRecoilValue(socketAtom);
-  const [users, setUsers] = useRecoilState(challengeUsers);
-  const [roomOwner, setRoomOwner] = useRecoilState(roomownerAtom);
+  const users = useRecoilValue(challengeUsers);
+  const roomOwner = useRecoilValue(roomownerAtom);
   const setChallengeStart = useSetRecoilState(challengeStartAtom);
   const intervalRef = useRef<number | undefined>(undefined);
 
