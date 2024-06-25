@@ -31,6 +31,7 @@ export default function () {
 
   const signupMutation = useMutation({
     mutationFn: async (signup: SignupProps) => {
+      if(!signup.username || !signup.email || !signup.password) return;
       return await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/auth/signup`,
         signup
@@ -40,6 +41,7 @@ export default function () {
 
   const singinMutation = useMutation({
     mutationFn: async () => {
+      if(!signin.username || !signin.password) return;
       await signIn("credentials", {
         username: signin.username,
         password: signin.password,

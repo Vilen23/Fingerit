@@ -6,7 +6,6 @@ import {
 } from "@/states/atoms/preference";
 import React, { useState } from "react";
 import { HiMiniWrenchScrewdriver } from "react-icons/hi2";
-import { IoIosTime } from "react-icons/io";
 import { TiSortAlphabetically } from "react-icons/ti";
 import { useRecoilState } from "recoil";
 import { FaCheckCircle, FaCrown } from "react-icons/fa";
@@ -27,6 +26,7 @@ export default function Navbar2() {
   const [customReady, setCustomReady] = useRecoilState(customReadyAtom);
 
   const handleCharValue = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError("");
     if (e.target.value.length > 4) {
       setError("Cannot exceed 4 cgharacters");
       return;
@@ -40,6 +40,7 @@ export default function Navbar2() {
   };
 
   const handleCustomText = () => {
+    setError("");
     if (charCustom.length <= 0) {
       setError("Cannot be empty");
       return;
@@ -140,6 +141,7 @@ export default function Navbar2() {
             /></div>
         </motion.div>
       }
+      {error && <p className="text-red-500 text-xs">{error}</p>}
     </div >
   );
 }

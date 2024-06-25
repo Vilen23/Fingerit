@@ -35,4 +35,5 @@ interface LetterProps {
 export const letterArrayAtom = atom<LetterProps[]>({
   key: "letterArrayAtom",
   default: [],
+  effects_UNSTABLE: [persistAtom],
 });

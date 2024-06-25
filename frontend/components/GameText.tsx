@@ -21,16 +21,37 @@ import ResultCard from "./ResultCard";
 import { roomownerAtom } from "@/states/atoms/roomowner";
 import { challengeStartAtom, challengeUsers } from "@/states/atoms/challenge";
 import { socketAtom } from "@/states/atoms/socket";
+import Image from "next/image";
 interface LetterProps {
   letter: string;
   color: string;
 }
+interface userSpeedProps {
+  speed: number;
+  user: {
+    id: string;
+    username: string;
+  };
+}
 
+interface GameTextProps {
+  cursorIndex: number;
+  startTime: number;
+  isgameOver: boolean;
+  correctInput: number;
+  wrongInputs: number;
+  maxWrong: number;
+  result: {
+    accuracy: string;
+    speed: string;
+    rawspeed: string;
+  };
+  totaltype: number;
+}
 export default function TypingComponent() {
   const session = useSession();
   const [fetch, setFetch] = useState(false);
   const [maxWrong, setMaxWrong] = useState(0);
-  const [liveSpeed, setLiveSpeed] = useState(0);
   const [totaltype, setTotaltype] = useState(0);
   const [cursorIndex, setCursorIndex] = useState(0);
   const [wrongInputs, setwrongInputs] = useState(0);
@@ -44,21 +65,20 @@ export default function TypingComponent() {
   const [wordsData, setWordsData] = useRecoilState(wordDataAtom);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [letterarray, setLetterarray] = useRecoilState(letterArrayAtom);
-  const [challengeStart, setChallengeStart] =
-    useRecoilState(challengeStartAtom);
+  const challengeStart = useRecoilValue(challengeStartAtom);
   const inputRef = useRef<HTMLInputElement>(null);
   const preference = useRecoilValue(preferenceAtom);
   const charCustom = useRecoilValue(charCustomAtom);
-  const setUsers = useSetRecoilState(challengeUsers);
+  const [users, setUsers] = useRecoilState(challengeUsers);
   const customReady = useRecoilValue(customReadyAtom);
-
+  const [usersSpeed, setUsersSpeed] = useState<userSpeedProps[]>([]);
+  
   //Fetching the words from the backend and setting them into recoil state and persisting it into local storage
   useEffect(() => {
     if (session.data && !isData) {
       const getData = async () => {
         const response = await axios.get(`
-          ${process.env.NEXT_PUBLIC_API_URL} / getData`
-        );
+          ${process.env.NEXT_PUBLIC_API_URL}/getData`);
         if (response.status === 200) {
           setWordsData(response.data.words);
           setIsData(true);
@@ -70,14 +90,11 @@ export default function TypingComponent() {
 
   useEffect(() => {
     if (preference.mode === "challenge" && challengeStart) {
-      console.log("heer");
       inputRef.current?.focus();
     }
   }, [challengeStart]);
 
   //Challenge mode logic
-
-
   useEffect(() => {
     if (preference.mode === "challenge" && session?.data?.user) {
       const ws = new WebSocket("ws://localhost:8080");
@@ -116,16 +133,15 @@ export default function TypingComponent() {
           setLetterarray(temparray);
           setFetch(true);
         } else if (data.action === "speed") {
-          console.log(data.payload);
+          setUsersSpeed(data.payload);
         }
       };
     }
   }, [session]);
 
-
-
   //Generating the words for the test
   useEffect(() => {
+    if (preference.mode === "challenge") return;
     setCursorIndex(0);
     setStartTime(0);
     setIsgameOver(false);
@@ -134,8 +150,8 @@ export default function TypingComponent() {
     setMaxWrong(0);
     setResult({ accuracy: "0", speed: "0", rawspeed: "0" });
     setTotaltype(0);
+
     if (inputRef.current) inputRef.current.value = "";
-    if (preference.mode === "challenge") return;
     let stringtemp = "";
     let common_words = wordsData.common_words;
     if (preference.mode === "words") {
@@ -171,7 +187,7 @@ export default function TypingComponent() {
   }, [session.data, preference, fetch, customReady]);
 
   useEffect(() => {
-    if (inputRef.current && customReady && preference.mode !== "challenge") {
+    if (inputRef.current && (customReady || preference.mode !== "challenge")) {
       inputRef.current.focus();
     }
   }, [preference, customReady]);
@@ -179,9 +195,6 @@ export default function TypingComponent() {
   const handleInputChange = (event: any) => {
     let ans = event.target.value;
     let lengthofinput = event.target.value.length;
-    if (lengthofinput === 1 && !startTime) {
-      setStartTime(new Date().getTime());
-    }
     let newCorrectInput = 0;
     let newWrongInput = 0;
     const newarray = letterarray.map(
@@ -197,6 +210,7 @@ export default function TypingComponent() {
             setMaxWrong(maxWrong + 1);
             setCursorIndex(index);
             setTotaltype(totaltype + 1);
+
             return { ...item, color: "text-red-500" };
           }
         } else {
@@ -204,9 +218,13 @@ export default function TypingComponent() {
         }
       }
     );
+
     setCorrectInput(newCorrectInput);
-    setLetterarray(newarray);
     setwrongInputs(newWrongInput);
+    setLetterarray(newarray);
+    if (lengthofinput === 1 && !startTime) {
+      setStartTime(new Date().getTime());
+    }
 
     if (!startTime) return;
     const curr = new Date().getTime();
@@ -280,11 +298,11 @@ export default function TypingComponent() {
         Loading....
       </div>
     );
-
   return (
     <div
-      className={`flex justify-center items-center flex-col ${preference.mode === "challenge" ? "h-[40vh]" : "h-[60vh]"
-        } `}
+      className={`flex justify-center items-center flex-col ${
+        preference.mode === "challenge" ? "h-[40vh]" : "h-[60vh]"
+      } `}
     >
       <div className="text-[30px] relative w-[80vw] text-center">
         {letterarray.map((word, index) => (
@@ -309,7 +327,7 @@ export default function TypingComponent() {
         onChange={handleInputChange}
         className="mt-4 p-2 border-0 rounded absolute opacity-0  w-[80vw] "
       />
-      {isgameOver && (
+      {isgameOver && preference.mode !== "challenge" && (
         <div className="absolute bottom-[200px]">
           <ResultCard
             accuracy={result.accuracy}
@@ -318,6 +336,68 @@ export default function TypingComponent() {
           />
         </div>
       )}
+      {preference.mode === "challenge" && !isgameOver && (
+        <div className="absolute bottom-[250px] flex  gap-10 items-center">
+          <Image
+            src="/resultImage.jpg"
+            width={200}
+            height={100}
+            alt="resultImage"
+            className=" rounded-l-lg"
+          />
+          <div className="flex flex-col gap-2">
+            {users.map((users: any) => {
+              return (
+                <div className="flex gap-4">
+                  <p className="font-semibold">{users.username}</p>
+                  {usersSpeed ? (
+                    usersSpeed
+                      .filter((user: userSpeedProps) => {
+                        return users.id === user.user.id && user.speed > 0;
+                      })
+                      .sort(
+                        (a: userSpeedProps, b: userSpeedProps) =>
+                          b.speed - a.speed
+                      )
+                      .map((user: userSpeedProps) => <p>{user.speed}</p>)
+                  ) : (
+                    <p>0</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {isgameOver && preference.mode === "challenge" && (
+        <div className="w-[600px] rounded-lg h-[200px] bg-[#F6D99A] flex gap-4 absolute bottom-[250px]">
+          <Image
+            src="/resultImage.jpg"
+            width={200}
+            height={100}
+            alt="resultImage"
+            className="rounded-l-lg"
+          />
+          <div className="w-full flex flex-col items-center text-[#282828]">
+            <h1 className="font-bold text-3xl">Results</h1>
+            {usersSpeed
+              .filter((userSpeed: userSpeedProps) => userSpeed.speed > 0)
+              .sort((a: userSpeedProps, b: userSpeedProps) => b.speed - a.speed)
+              .map((userSpeed: userSpeedProps) => {
+                const user = users.find(
+                  (user: any) => user.id === userSpeed.user.id
+                );
+                return (
+                  <div className="flex gap-4" key={userSpeed.user.id}>
+                    <p className="font-semibold">{userSpeed.user.username}</p>
+                    <p>{userSpeed.speed}WPM</p>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
       <div className="flex absolute items-center gap-2 bottom-10">
         <span className="bg-[#F6D99A] text-[#282828] text-[13px] p-[2px] px-[5px] font-semibold">
           Enter

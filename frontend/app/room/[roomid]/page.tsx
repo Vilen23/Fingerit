@@ -39,7 +39,6 @@ export default function ChallengeRoom() {
       session?.data?.user.id === roomOwner &&
       timerStart
     ) {
-      console.log("jara hai bro");
       socket.send(JSON.stringify({ action: "start" }));
     }
   }, [timerStart]);
@@ -48,8 +47,6 @@ export default function ChallengeRoom() {
     if (socket) {
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log("ara hai bro");
-        console.log(data);
         if (data.action === "start") {
           setTimerStart(true);
           clearInterval(intervalRef.current); // Clear any existing interval
@@ -59,7 +56,6 @@ export default function ChallengeRoom() {
             setChallengeStart(true);
           }, 5000);
         } else if (data.action === "reload") {
-          console.log("sadff")
           window.location.reload();
         }
       };
