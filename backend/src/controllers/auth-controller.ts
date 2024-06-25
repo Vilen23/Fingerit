@@ -87,7 +87,6 @@ export const googleSignup = async (req: Request, res: Response) => {
           password: hashPassword,
         },
       });
-      console.log(user)
       return res.status(201).json({ message: "User successfully created", user });
     } else {
       const checkPassword = await bcrypt.compare(password, user.password);

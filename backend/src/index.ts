@@ -31,7 +31,6 @@ wss.on("connection", (ws: CustomWebSocket) => {
     const { action, payload } = JSON.parse(message.toString());
     switch (action) {
       case "joinRoom":
-        console.log("hopped up")
         const { roomId, userId, word } = payload;
         if (!rooms[roomId]) {
           rooms[roomId] = new Set();
@@ -67,8 +66,8 @@ wss.on("connection", (ws: CustomWebSocket) => {
               gametext: word,
             },
             select: {
-              gametext: true
-            }
+              gametext: true,
+            },
           });
         }
         const gametext = await db.room.findFirst({
@@ -94,7 +93,6 @@ wss.on("connection", (ws: CustomWebSocket) => {
           },
         });
         if (!rooms[roomId]) return;
-        console.log(rooms[roomId].size);
 
         rooms[roomId].forEach((client) => {
           if (client !== ws && client.readyState === WebSocket.OPEN) {
@@ -143,16 +141,21 @@ wss.on("connection", (ws: CustomWebSocket) => {
             roomId: ws.roomId,
           },
         });
-        const usersInChallengeMap = new Map();
-        usersInChallenge.map((user) => {
-          usersInChallengeMap.set(user.userId, user);
+        const usersChallenge = await db.user.findMany({
+          where: {
+            id: {
+              in: usersInChallenge.map((user) => user.userId),
+            },
+          },
         });
-        console.log(usersInChallengeMap)
+        const usersInChallengeMap = new Map();
+        usersChallenge.map((user) => {
+          usersInChallengeMap.set(user.id, user);
+        });
         const roomDetails = Array.from(rooms[ws.roomId]).map((client) => ({
           speed: client.speed,
           user: usersInChallengeMap.get(client.userId),
         }));
-        console.log(roomDetails)
         rooms[ws.roomId].forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             client.send(
@@ -173,5 +176,3 @@ wss.on("connection", (ws: CustomWebSocket) => {
     }
   });
 });
-
-
