@@ -189,7 +189,7 @@ export default function TypingComponent() {
     if (inputRef.current && (customReady || preference.mode !== "challenge")) {
       inputRef.current.focus();
     }
-  }, [preference, customReady, inputRef.current]);
+  }, [preference, customReady]);
 
   const handleInputChange = (event: any) => {
     let ans = event.target.value;
