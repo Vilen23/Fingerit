@@ -1,7 +1,6 @@
 "use client";
 import { resultAtom } from "@/states/atoms/result";
 import {
-  challengeAtom,
   isDataAtom,
   letterArrayAtom,
   wordDataAtom,

@@ -6,11 +6,11 @@ interface resultProps {
   rawspeed: string;
 }
 
-export const resultAtom = atom({
+export const resultAtom = atom<resultProps>({
   key: "resultAtom",
   default: {
-    accuracy:"",
-    speed:"",
-    rawspeed:"",
+    accuracy: "",
+    speed: "",
+    rawspeed: "",
   },
 });
