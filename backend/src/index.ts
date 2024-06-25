@@ -35,13 +35,6 @@ wss.on("connection", (ws: CustomWebSocket) => {
         if (!rooms[roomId]) {
           rooms[roomId] = new Set();
         }
-        // Array.from(rooms[roomId]).forEach((client) => {
-        //   if (client.userId === userId && client.readyState === WebSocket.OPEN) {
-        //     client.close();
-        //     rooms[roomId].delete(client)
-        //   }
-        // })
-
         rooms[roomId].add(ws);
         ws.roomId = roomId;
         ws.userId = userId;
