@@ -16,7 +16,7 @@ import {
   preferenceAtom,
 } from "@/states/atoms/preference";
 import "./cursorblink.css";
-import {ResultCard} from "./ResultCard";
+import { ResultCard } from "./ResultCard";
 import { roomownerAtom } from "@/states/atoms/roomowner";
 import { challengeStartAtom, challengeUsers } from "@/states/atoms/challenge";
 import { socketAtom } from "@/states/atoms/socket";
@@ -96,7 +96,7 @@ export const TypingComponent = () => {
   //Challenge mode logic
   useEffect(() => {
     if (preference.mode === "challenge" && session?.data?.user) {
-      const ws = new WebSocket("ws://localhost:8080");
+      const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}`);
       setSocket(ws);
       let stringtemp = "";
       let common_words = wordsData.common_words;
@@ -114,7 +114,7 @@ export const TypingComponent = () => {
               userId: session.data.user.id,
               word: stringtemp,
             },
-          })
+          }),
         );
       };
       ws.onmessage = (event) => {
@@ -174,7 +174,7 @@ export const TypingComponent = () => {
       let char = charCustom;
       let characters = char.split("");
       const filteredWords = common_words.filter((word: any) =>
-        characters.some((char) => word.includes(char))
+        characters.some((char) => word.includes(char)),
       );
       for (let i = filteredWords.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -237,7 +237,7 @@ export const TypingComponent = () => {
         } else {
           return { ...item, color: "text-[#EBDAB4]/50" };
         }
-      }
+      },
     );
 
     setCorrectInput(newCorrectInput);
@@ -262,7 +262,7 @@ export const TypingComponent = () => {
         JSON.stringify({
           action: "speed",
           payload: { speed: speed, user: session?.data?.user },
-        })
+        }),
       );
     }
     if (cursorIndex === textstring.length - 1) {
@@ -378,7 +378,7 @@ export const TypingComponent = () => {
                       })
                       .sort(
                         (a: userSpeedProps, b: userSpeedProps) =>
-                          b.speed - a.speed
+                          b.speed - a.speed,
                       )
                       .map((user: userSpeedProps) => (
                         <p key={user.speed}>{user.speed}</p>
@@ -408,7 +408,7 @@ export const TypingComponent = () => {
               .sort((a: userSpeedProps, b: userSpeedProps) => b.speed - a.speed)
               .map((userSpeed: userSpeedProps) => {
                 const user = users.find(
-                  (user: any) => user.id === userSpeed.user.id
+                  (user: any) => user.id === userSpeed.user.id,
                 );
                 return (
                   <div className="flex gap-4" key={userSpeed.user.id}>

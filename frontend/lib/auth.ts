@@ -8,14 +8,20 @@ export const NEXT_AUTH = {
       name: "Credentials",
       credentials: {
         username: { label: "username", type: "text", placeholder: "username" },
-        password: { label: "password", type: "password", placeholder: "password" },
+        password: {
+          label: "password",
+          type: "password",
+          placeholder: "password",
+        },
       },
       async authorize(credentials) {
         try {
+          console.log("getting logging in");
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/signin`,
             credentials
           );
+          console.log(response);
           if (response.status === 201) {
             return response.data.user;
           } else throw new Error("Invalid credentials");
@@ -47,7 +53,12 @@ export const NEXT_AUTH = {
         try {
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/signup/google`,
-            { username: name, email, password: name,userId:googleuser.user.id }
+            {
+              username: name,
+              email,
+              password: name,
+              userId: googleuser.user.id,
+            }
           );
           if (response.status === 201) {
             return googleuser.user;
@@ -79,4 +90,3 @@ export const NEXT_AUTH = {
     },
   },
 };
-
