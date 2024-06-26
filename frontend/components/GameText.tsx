@@ -136,7 +136,7 @@ export const TypingComponent = () => {
         }
       };
     }
-  }, [session, preference.mode, wordsData.common_words, setSocket]);
+  }, [session, preference.mode, wordsData.common_words]);
 
   //Generating the words for the test
   useEffect(() => {
