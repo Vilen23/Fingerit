@@ -71,7 +71,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
             gametext: true,
           },
         });
-        const usersId = roomusers.map((user) => user.userId);
+        const usersId = roomusers.map((user: any) => user.userId);
         const users = await db.user.findMany({
           where: {
             id: {
@@ -98,7 +98,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
                   room: room,
                   words: ws.words || gametext?.gametext,
                 },
-              })
+              }),
             );
           }
         });
@@ -137,12 +137,12 @@ wss.on("connection", (ws: CustomWebSocket) => {
         const usersChallenge = await db.user.findMany({
           where: {
             id: {
-              in: usersInChallenge.map((user) => user.userId),
+              in: usersInChallenge.map((user: any) => user.userId),
             },
           },
         });
         const usersInChallengeMap = new Map();
-        usersChallenge.map((user) => {
+        usersChallenge.map((user: any) => {
           usersInChallengeMap.set(user.id, user);
         });
         const roomDetails = Array.from(rooms[ws.roomId]).map((client) => ({
@@ -152,7 +152,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
         rooms[ws.roomId].forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             client.send(
-              JSON.stringify({ action: "speed", payload: roomDetails })
+              JSON.stringify({ action: "speed", payload: roomDetails }),
             );
           }
         });
