@@ -52,6 +52,7 @@ export const signin = async (req: Request, res: Response) => {
     const checkPassword = await bcrypt.compare(password, isUser.password);
     if (!checkPassword)
       return res.status(409).json({ error: "Wrong username/password" });
+    console.log("login")
     return res.status(201).json({
       message: "User successfully signed in",
       user: {
