@@ -96,7 +96,7 @@ export const TypingComponent = () => {
   //Challenge mode logic
   useEffect(() => {
     if (preference.mode === "challenge" && session?.data?.user) {
-      const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}`);
+      const ws = new WebSocket(`wss://fingerit.onrender.com`);
       setSocket(ws);
       let stringtemp = "";
       let common_words = wordsData.common_words;
