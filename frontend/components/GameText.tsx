@@ -136,19 +136,7 @@ export const TypingComponent = () => {
         }
       };
     }
-  }, [
-    session,
-    preference.mode,
-    wordsData.common_words,
-    setLetterarray,
-    setFetch,
-    setUsersSpeed,
-    setUsers,
-    setRoomOwner,
-    socket,
-    setSocket,
-    setTextstring,
-  ]);
+  }, [session, preference.mode, wordsData.common_words, setSocket]);
 
   //Generating the words for the test
   useEffect(() => {
