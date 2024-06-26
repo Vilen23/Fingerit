@@ -8,8 +8,8 @@ import dataRouter from "./routes/data-routes";
 
 const app = express();
 const httpServer = app.listen(8080);
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
 app.use("/auth", authRouter);
 app.use("/room", roomRouter);
@@ -25,12 +25,14 @@ const wss = new WebSocketServer({ server: httpServer });
 export const rooms: { [key: string]: Set<CustomWebSocket> } = {};
 app.set("wss", wss);
 wss.on("connection", (ws: CustomWebSocket) => {
+  console.log("connected");
   ws.on("error", console.error);
 
   ws.on("message", async (message) => {
     const { action, payload } = JSON.parse(message.toString());
     switch (action) {
       case "joinRoom":
+        console.log("hello");
         const { roomId, userId, word } = payload;
         if (!rooms[roomId]) {
           rooms[roomId] = new Set();
@@ -98,7 +100,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
                   room: room,
                   words: ws.words || gametext?.gametext,
                 },
-              }),
+              })
             );
           }
         });
@@ -152,7 +154,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
         rooms[ws.roomId].forEach((client) => {
           if (client.readyState === WebSocket.OPEN) {
             client.send(
-              JSON.stringify({ action: "speed", payload: roomDetails }),
+              JSON.stringify({ action: "speed", payload: roomDetails })
             );
           }
         });
