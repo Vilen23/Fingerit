@@ -84,6 +84,7 @@ export const TypingComponent = () => {
     }
   }, [challengeStart, preference.mode]);
 
+  //Setting of words to display
   useEffect(() => {
     if (preference.mode === "challenge") return;
     setCursorIndex(0);
