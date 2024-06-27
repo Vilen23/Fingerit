@@ -104,23 +104,28 @@ export default function ChallengeRoom() {
       ws.onerror = (error) => {
         console.error("WebSocket error:", error);
       };
-      setSocket(ws);
 
-      return ws;
+      ws.onclose = (event) => {
+        console.error("WebSocket closed:", event);
+        setTimeout(() => {
+          createWebSocket();
+        }, 5000); // Retry connection after 5 seconds
+      };
+
+      setSocket(ws);
     };
 
     if (!socket) {
-      const ws = createWebSocket();
-      setSocket(ws);
-
-      return () => {
-        setSocket(null);
-        if (ws) {
-          ws.close();
-        }
-      };
+      createWebSocket();
     }
-  }, [session]);
+
+    return () => {
+      if (socket) {
+        socket.close();
+        setSocket(null);
+      }
+    };
+  }, [session, socket]);
 
   const handleUserJoined = (payload: any) => {
     setUsers(payload.users);
@@ -157,8 +162,8 @@ export default function ChallengeRoom() {
             className="bg-[#1C2022] px-3 py-2 rounded-lg font-semibold shadow-3xl"
             onClick={() => {
               setTimerStart(true);
-              clearInterval(intervalRef.current);
-              setTimer(5);
+              clearInterval(intervalRef.current); // Clear any existing interval
+              setTimer(5); // Reset timer to 5 seconds
               startTimer();
             }}
           >
