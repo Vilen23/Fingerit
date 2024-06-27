@@ -8,7 +8,12 @@ import dataRouter from "./routes/data-routes";
 
 const app = express();
 const httpServer = app.listen(8080);
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://fingerit.vercel.app",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use("/auth", authRouter);
@@ -100,9 +105,6 @@ wss.on("connection", (ws: CustomWebSocket) => {
               RoomOwner: true,
             },
           });
-
-          console.log(`Users in room ${roomId}:`, users);
-
           if (!rooms[roomId]) return;
           console.log(rooms[roomId].size);
           rooms[roomId].forEach((client) => {
