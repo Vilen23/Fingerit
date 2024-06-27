@@ -14,12 +14,12 @@ export const NEXT_AUTH = {
           placeholder: "password",
         },
       },
-      async authorize(credentials) {
+      async authorize(credentials: any) {
         try {
-          console.log("getting logging in");
+          console.log(credentials);
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/auth/signin`,
-            credentials
+            credentials,
           );
           console.log(response);
           if (response.status === 201) {
@@ -58,7 +58,7 @@ export const NEXT_AUTH = {
               email,
               password: name,
               userId: googleuser.user.id,
-            }
+            },
           );
           if (response.status === 201) {
             return googleuser.user;

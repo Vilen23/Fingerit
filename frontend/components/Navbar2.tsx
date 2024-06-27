@@ -4,13 +4,22 @@ import {
   customReadyAtom,
   preferenceAtom,
 } from "@/states/atoms/preference";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HiMiniWrenchScrewdriver } from "react-icons/hi2";
 import { TiSortAlphabetically } from "react-icons/ti";
 import { useRecoilState } from "recoil";
 import { FaCheckCircle, FaCrown } from "react-icons/fa";
 import { easeInOut, motion } from "framer-motion";
 import { RxDividerVertical } from "react-icons/rx";
+import { socketAtom } from "@/states/atoms/socket";
+import { letterArrayAtom, wordDataAtom, wordsAtom } from "@/states/atoms/words";
+import { useSession } from "next-auth/react";
+import {
+  challengeUsers,
+  fetchAtom,
+  userSpeedChallenge,
+} from "@/states/atoms/challenge";
+import { roomownerAtom } from "@/states/atoms/roomowner";
 
 export interface ModesProps {
   time: boolean;
@@ -20,10 +29,19 @@ export interface ModesProps {
 const modeValue = [10, 15, 30];
 
 export const Navbar2 = () => {
+  const session = useSession();
+  const [error, setError] = useState("");
   const [preference, setPreference] = useRecoilState(preferenceAtom);
   const [charCustom, setCharCustom] = useRecoilState(charCustomAtom);
-  const [error, setError] = useState("");
   const [customReady, setCustomReady] = useRecoilState(customReadyAtom);
+  const [fetch, setFetch] = useRecoilState(fetchAtom);
+  const [socket, setSocket] = useRecoilState(socketAtom);
+  const [users, setUsers] = useRecoilState(challengeUsers);
+  const [wordsData, setWordsData] = useRecoilState(wordDataAtom);
+  const [roomOwner, setRoomOwner] = useRecoilState(roomownerAtom);
+  const [textstring, setTextstring] = useRecoilState(wordsAtom);
+  const [letterarray, setLetterarray] = useRecoilState(letterArrayAtom);
+  const [usersSpeed, setUsersSpeed] = useRecoilState(userSpeedChallenge);
 
   const handleCharValue = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError("");
@@ -51,6 +69,7 @@ export const Navbar2 = () => {
     }
     setCustomReady(true);
   };
+
 
   if (!preference) return <div>Loading...</div>;
 

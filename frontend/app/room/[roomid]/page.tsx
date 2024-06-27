@@ -1,22 +1,33 @@
 "use client";
 import { TypingComponent } from "@/components/GameText";
-import { challengeStartAtom, challengeUsers } from "@/states/atoms/challenge";
+import {
+  challengeStartAtom,
+  challengeUsers,
+  fetchAtom,
+  userSpeedChallenge,
+} from "@/states/atoms/challenge";
 import { roomownerAtom } from "@/states/atoms/roomowner";
 import { socketAtom } from "@/states/atoms/socket";
+import { letterArrayAtom, wordDataAtom, wordsAtom } from "@/states/atoms/words";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { FaCrown } from "react-icons/fa";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useSetRecoilState } from "recoil";
 
 export default function ChallengeRoom() {
   const session = useSession();
   const [timer, setTimer] = useState(5);
   const [timerStart, setTimerStart] = useState(false);
-  const socket = useRecoilValue(socketAtom);
-  const users = useRecoilValue(challengeUsers);
-  const roomOwner = useRecoilValue(roomownerAtom);
   const setChallengeStart = useSetRecoilState(challengeStartAtom);
   const intervalRef = useRef<number | undefined>(undefined);
+  const [fetch, setFetch] = useRecoilState(fetchAtom);
+  const [socket, setSocket] = useRecoilState(socketAtom);
+  const [users, setUsers] = useRecoilState(challengeUsers);
+  const [wordsData, setWordsData] = useRecoilState(wordDataAtom);
+  const [roomOwner, setRoomOwner] = useRecoilState(roomownerAtom);
+  const [textstring, setTextstring] = useRecoilState(wordsAtom);
+  const [letterarray, setLetterarray] = useRecoilState(letterArrayAtom);
+  const [usersSpeed, setUsersSpeed] = useRecoilState(userSpeedChallenge);
 
   const startTimer = () => {
     intervalRef.current = window.setInterval(() => {
@@ -40,6 +51,57 @@ export default function ChallengeRoom() {
       socket.send(JSON.stringify({ action: "start" }));
     }
   }, [timerStart, roomOwner, session?.data?.user.id, socket]);
+
+  useEffect(() => {
+    let stringtemp = "";
+    for (let i = 0; i < 10; i++) {
+      let randomIndex = Math.floor(
+        Math.random() * wordsData.common_words.length
+      );
+      stringtemp += wordsData.common_words[randomIndex] + " ";
+    }
+  }, []);
+  
+  useEffect(() => {
+    const ws = new WebSocket("wss://fingerit.onrender.com");
+    setSocket(ws);
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify({
+          action: "joinRoom",
+          payload: {
+            roomId: window.location.pathname.split("/")[2],
+            userId: session?.data?.user.id,
+            word: "hello this is shivam here",
+          },
+        })
+      );
+      console.log("jara ahi");
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.action === "userJoined") {
+        const payload = data.payload;
+        handleuserJoined(payload);
+      } else if (data.action === "speed") {
+        setUsersSpeed(data.payload);
+      }
+    };
+  }, [session]);
+
+  const handleuserJoined = (payload: any) => {
+    setUsers(payload.users);
+    setRoomOwner(payload.roomOwner);
+    let wordstring = payload.words.trim();
+    setTextstring(wordstring);
+    let temparray = Array.from(wordstring).map((char: any) => ({
+      letter: char,
+      color: "text-[#EBDAB4]/50",
+    }));
+    setLetterarray(temparray);
+    setFetch(true);
+  };
 
   useEffect(() => {
     if (socket) {

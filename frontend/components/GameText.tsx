@@ -18,7 +18,7 @@ import {
 import "./cursorblink.css";
 import { ResultCard } from "./ResultCard";
 import { roomownerAtom } from "@/states/atoms/roomowner";
-import { challengeStartAtom, challengeUsers } from "@/states/atoms/challenge";
+import { challengeStartAtom, challengeUsers, fetchAtom, userSpeedChallenge } from "@/states/atoms/challenge";
 import { socketAtom } from "@/states/atoms/socket";
 import Image from "next/image";
 interface LetterProps {
@@ -33,23 +33,9 @@ interface userSpeedProps {
   };
 }
 
-interface GameTextProps {
-  cursorIndex: number;
-  startTime: number;
-  isgameOver: boolean;
-  correctInput: number;
-  wrongInputs: number;
-  maxWrong: number;
-  result: {
-    accuracy: string;
-    speed: string;
-    rawspeed: string;
-  };
-  totaltype: number;
-}
 export const TypingComponent = () => {
   const session = useSession();
-  const [fetch, setFetch] = useState(false);
+  const [fetch, setFetch] = useRecoilState(fetchAtom);
   const [maxWrong, setMaxWrong] = useState(0);
   const [totaltype, setTotaltype] = useState(0);
   const [cursorIndex, setCursorIndex] = useState(0);
@@ -70,7 +56,7 @@ export const TypingComponent = () => {
   const charCustom = useRecoilValue(charCustomAtom);
   const [users, setUsers] = useRecoilState(challengeUsers);
   const customReady = useRecoilValue(customReadyAtom);
-  const [usersSpeed, setUsersSpeed] = useState<userSpeedProps[]>([]);
+  const [usersSpeed, setUsersSpeed] = useRecoilState(userSpeedChallenge);
 
   //Fetching the words from the backend and setting them into recoil state and persisting it into local storage
   useEffect(() => {
@@ -93,55 +79,60 @@ export const TypingComponent = () => {
     }
   }, [challengeStart, preference.mode]);
 
-  //Challenge mode logic
-  useEffect(() => {
-    if (preference.mode === "challenge" && session?.data?.user) {
-      const ws = new WebSocket(`wss://fingerit.onrender.com`);
-      setSocket(ws);
-      console.log(ws);
-      console.log(ws);
-      console.log(ws);
-      let stringtemp = "";
-      let common_words = wordsData.common_words;
-      for (let i = 0; i < 10; i++) {
-        let randomIndex = Math.floor(Math.random() * common_words.length);
-        stringtemp += common_words[randomIndex] + " ";
-      }
-      //Sending the user details along with the words randomly generated but backend will only proceed with oweners words
-      ws.onopen = () => {
-        ws.send(
-          JSON.stringify({
-            action: "joinRoom",
-            payload: {
-              roomId: window.location.pathname.split("/")[2],
-              userId: session.data.user.id,
-              word: stringtemp,
-            },
-          })
-        );
-        console.log("gaya")
-      };
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log(data);
-        if (data.action === "userJoined") {
-          setUsers(data.payload.users);
-          setRoomOwner(data.payload.roomOwner);
-          stringtemp = data.payload.words;
-          let wordsstring = stringtemp.trim();
-          setTextstring(wordsstring);
-          let temparray = Array.from(wordsstring).map((char) => ({
-            letter: char,
-            color: "text-[#EBDAB4]/50",
-          }));
-          setLetterarray(temparray);
-          setFetch(true);
-        } else if (data.action === "speed") {
-          setUsersSpeed(data.payload);
-        }
-      };
-    }
-  }, [session, preference.mode, wordsData.common_words,setLetterarray,setRoomOwner,setSocket,setTextstring,setUsers]);
+  // //Challenge mode logic
+  // useEffect(() => {
+  //   if (preference.mode === "challenge" && session?.data?.user) {
+  //     const ws = new WebSocket(`wss://fingerit.onrender.com`);
+  //     setSocket(ws);
+  //     console.log(ws);
+  //     let stringtemp = "";
+  //     let common_words = wordsData.common_words;
+  //     for (let i = 0; i < 10; i++) {
+  //       let randomIndex = Math.floor(Math.random() * common_words.length);
+  //       stringtemp += common_words[randomIndex] + " ";
+  //     }
+  //     //Sending the user details along with the words randomly generated but backend will only proceed with oweners words
+  //     ws.onopen = () => {
+  //       ws.send(
+  //         JSON.stringify({
+  //           action: "joinRoom",
+  //           payload: {
+  //             roomId: window.location.pathname.split("/")[2],
+  //             userId: session.data.user.id,
+  //             word: stringtemp,
+  //           },
+  //         }),
+  //       );
+  //     };
+  //     ws.onmessage = (event) => {
+  //       const data = JSON.parse(event.data);
+  //       if (data.action === "userJoined") {
+  //         setUsers(data.payload.users);
+  //         setRoomOwner(data.payload.roomOwner);
+  //         stringtemp = data.payload.words;
+  //         let wordsstring = stringtemp.trim();
+  //         setTextstring(wordsstring);
+  //         let temparray = Array.from(wordsstring).map((char) => ({
+  //           letter: char,
+  //           color: "text-[#EBDAB4]/50",
+  //         }));
+  //         setLetterarray(temparray);
+  //         setFetch(true);
+  //       } else if (data.action === "speed") {
+  //         setUsersSpeed(data.payload);
+  //       }
+  //     };
+  //   }
+  // }, [
+  //   session,
+  //   preference.mode,
+  //   wordsData.common_words,
+  //   setLetterarray,
+  //   setRoomOwner,
+  //   setSocket,
+  //   setTextstring,
+  //   setUsers,
+  // ]);
 
   //Generating the words for the test
   useEffect(() => {
@@ -167,7 +158,7 @@ export const TypingComponent = () => {
       let char = charCustom;
       let characters = char.split("");
       const filteredWords = common_words.filter((word: any) =>
-        characters.some((char) => word.includes(char))
+        characters.some((char) => word.includes(char)),
       );
       for (let i = filteredWords.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -230,7 +221,7 @@ export const TypingComponent = () => {
         } else {
           return { ...item, color: "text-[#EBDAB4]/50" };
         }
-      }
+      },
     );
 
     setCorrectInput(newCorrectInput);
@@ -255,7 +246,7 @@ export const TypingComponent = () => {
         JSON.stringify({
           action: "speed",
           payload: { speed: speed, user: session?.data?.user },
-        })
+        }),
       );
     }
     if (cursorIndex === textstring.length - 1) {
@@ -350,8 +341,8 @@ export const TypingComponent = () => {
           />
         </div>
       )}
-      {preference.mode === "challenge" && !isgameOver && (
-        <div className="absolute bottom-[250px] flex  gap-10 items-center">
+      {/* {preference.mode === "challenge" && !isgameOver && (
+        <div className="absolute bottom-[12vh] flex  gap-10 items-center">
           <Image
             src="/resultImage.jpg"
             width={200}
@@ -371,7 +362,7 @@ export const TypingComponent = () => {
                       })
                       .sort(
                         (a: userSpeedProps, b: userSpeedProps) =>
-                          b.speed - a.speed
+                          b.speed - a.speed,
                       )
                       .map((user: userSpeedProps) => (
                         <p key={user.speed}>{user.speed}</p>
@@ -384,9 +375,9 @@ export const TypingComponent = () => {
             })}
           </div>
         </div>
-      )}
+      )} */}
       {isgameOver && preference.mode === "challenge" && (
-        <div className="w-[600px] rounded-lg h-[200px] bg-[#F6D99A] flex gap-4 absolute bottom-[250px]">
+        <div className="w-[600px] rounded-lg h-[200px] bg-[#F6D99A] flex gap-4 absolute bottom-[12vh]">
           <Image
             src="/resultImage.jpg"
             width={200}
@@ -401,7 +392,7 @@ export const TypingComponent = () => {
               .sort((a: userSpeedProps, b: userSpeedProps) => b.speed - a.speed)
               .map((userSpeed: userSpeedProps) => {
                 const user = users.find(
-                  (user: any) => user.id === userSpeed.user.id
+                  (user: any) => user.id === userSpeed.user.id,
                 );
                 return (
                   <div className="flex gap-4" key={userSpeed.user.id}>
