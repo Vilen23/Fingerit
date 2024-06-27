@@ -79,62 +79,7 @@ export const TypingComponent = () => {
     }
   }, [challengeStart, preference.mode]);
 
-  // //Challenge mode logic
-  // useEffect(() => {
-  //   if (preference.mode === "challenge" && session?.data?.user) {
-  //     const ws = new WebSocket(`wss://fingerit.onrender.com`);
-  //     setSocket(ws);
-  //     console.log(ws);
-  //     let stringtemp = "";
-  //     let common_words = wordsData.common_words;
-  //     for (let i = 0; i < 10; i++) {
-  //       let randomIndex = Math.floor(Math.random() * common_words.length);
-  //       stringtemp += common_words[randomIndex] + " ";
-  //     }
-  //     //Sending the user details along with the words randomly generated but backend will only proceed with oweners words
-  //     ws.onopen = () => {
-  //       ws.send(
-  //         JSON.stringify({
-  //           action: "joinRoom",
-  //           payload: {
-  //             roomId: window.location.pathname.split("/")[2],
-  //             userId: session.data.user.id,
-  //             word: stringtemp,
-  //           },
-  //         }),
-  //       );
-  //     };
-  //     ws.onmessage = (event) => {
-  //       const data = JSON.parse(event.data);
-  //       if (data.action === "userJoined") {
-  //         setUsers(data.payload.users);
-  //         setRoomOwner(data.payload.roomOwner);
-  //         stringtemp = data.payload.words;
-  //         let wordsstring = stringtemp.trim();
-  //         setTextstring(wordsstring);
-  //         let temparray = Array.from(wordsstring).map((char) => ({
-  //           letter: char,
-  //           color: "text-[#EBDAB4]/50",
-  //         }));
-  //         setLetterarray(temparray);
-  //         setFetch(true);
-  //       } else if (data.action === "speed") {
-  //         setUsersSpeed(data.payload);
-  //       }
-  //     };
-  //   }
-  // }, [
-  //   session,
-  //   preference.mode,
-  //   wordsData.common_words,
-  //   setLetterarray,
-  //   setRoomOwner,
-  //   setSocket,
-  //   setTextstring,
-  //   setUsers,
-  // ]);
-
-  //Generating the words for the test
+console.log(preference.mode)
   useEffect(() => {
     if (preference.mode === "challenge") return;
     setCursorIndex(0);

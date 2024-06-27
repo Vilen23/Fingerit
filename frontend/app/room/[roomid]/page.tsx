@@ -99,7 +99,7 @@ export default function ChallengeRoom() {
         console.log("WebSocket connection closed, attempting to reconnect...");
         setTimeout(() => {
           createWebSocket();
-        }, 3000); // Attempt to reconnect after 3 seconds
+        }, 3000); 
       };
 
       setSocket(ws);
@@ -134,8 +134,8 @@ export default function ChallengeRoom() {
         const data = JSON.parse(event.data);
         if (data.action === "start") {
           setTimerStart(true);
-          clearInterval(intervalRef.current); // Clear any existing interval
-          setTimer(5); // Reset timer to 5 seconds
+          clearInterval(intervalRef.current); 
+          setTimer(5); 
           startTimer();
           setTimeout(() => {
             setChallengeStart(true);
