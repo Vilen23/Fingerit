@@ -76,7 +76,7 @@ export default function ChallengeRoom() {
           },
         })
       );
-      console.log("jara ahi");
+      console.log("going out");
     };
 
     ws.onmessage = (event) => {
