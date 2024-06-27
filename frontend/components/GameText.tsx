@@ -117,6 +117,7 @@ export const TypingComponent = () => {
             },
           })
         );
+        console.log("gaya")
       };
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
