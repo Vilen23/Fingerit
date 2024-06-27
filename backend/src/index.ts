@@ -90,8 +90,8 @@ wss.on("connection", (ws: CustomWebSocket) => {
               RoomOwner: true,
             },
           });
-          if (!rooms[roomId]) return;
           console.log("someone hopped in");
+          if (!rooms[roomId]) return;
           rooms[roomId].forEach((client) => {
             if (client !== ws && client.readyState === WebSocket.OPEN) {
               client.send(
