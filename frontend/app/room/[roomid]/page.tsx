@@ -18,7 +18,6 @@ export default function ChallengeRoom() {
   const session = useSession();
   const [timer, setTimer] = useState(5);
   const [timerStart, setTimerStart] = useState(false);
-  const setChallengeStart = useSetRecoilState(challengeStartAtom);
   const intervalRef = useRef<number | undefined>(undefined);
   const [fetch, setFetch] = useRecoilState(fetchAtom);
   const [socket, setSocket] = useRecoilState(socketAtom);
@@ -28,6 +27,7 @@ export default function ChallengeRoom() {
   const [textstring, setTextstring] = useRecoilState(wordsAtom);
   const [letterarray, setLetterarray] = useRecoilState(letterArrayAtom);
   const [usersSpeed, setUsersSpeed] = useRecoilState(userSpeedChallenge);
+  const setChallengeStart = useSetRecoilState(challengeStartAtom);
 
   const startTimer = () => {
     intervalRef.current = window.setInterval(() => {
@@ -63,15 +63,19 @@ export default function ChallengeRoom() {
   }, []);
 
   useEffect(() => {
+    const roomId = window.location.pathname.split("/")[2];
+    const userId = session?.data?.user.id;
+    if(!userId) return;
     const createWebSocket = () => {
-      const ws = new WebSocket("wss://fingerit.onrender.com");
+      const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}`);
+
       ws.onopen = () => {
         ws.send(
           JSON.stringify({
             action: "joinRoom",
             payload: {
-              roomId: window.location.pathname.split("/")[2],
-              userId: session?.data?.user.id,
+              roomId: roomId,
+              userId: userId,
               word: "hello this is shivam here",
             },
           })
@@ -80,10 +84,10 @@ export default function ChallengeRoom() {
       };
 
       ws.onmessage = (event) => {
-        console.log("Message received");
+        console.log("WebSocket message received:", event.data);
         const data = JSON.parse(event.data);
-        console.log(data);
         if (data.action === "userJoined") {
+          console.log(data.payload);
           const payload = data.payload;
           handleUserJoined(payload);
         } else if (data.action === "speed") {
@@ -104,28 +108,13 @@ export default function ChallengeRoom() {
       ws.onerror = (error) => {
         console.error("WebSocket error:", error);
       };
-
-      ws.onclose = (event) => {
-        console.error("WebSocket closed:", event);
-        setTimeout(() => {
-          createWebSocket();
-        }, 5000); // Retry connection after 5 seconds
-      };
-
       setSocket(ws);
     };
 
     if (!socket) {
       createWebSocket();
     }
-
-    return () => {
-      if (socket) {
-        socket.close();
-        setSocket(null);
-      }
-    };
-  }, [session, socket]);
+  }, [session]);
 
   const handleUserJoined = (payload: any) => {
     setUsers(payload.users);
