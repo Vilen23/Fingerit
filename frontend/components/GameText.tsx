@@ -139,7 +139,7 @@ export const TypingComponent = () => {
         }
       };
     }
-  }, [session, preference.mode, wordsData.common_words]);
+  }, [session, preference.mode, wordsData.common_words,setLetterarray,setRoomOwner,setSocket,setTextstring,setUsers]);
 
   //Generating the words for the test
   useEffect(() => {
