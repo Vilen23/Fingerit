@@ -7,7 +7,7 @@ interface ResultProps {
 }
 export const ResultCard = ({ accuracy, speed, rawspeed }: ResultProps) => {
   return (
-    <div className="w-[600px] rounded-lg h-[12vh] bg-[#F6D99A] flex items-center gap-4">
+    <div className="w-[600px] rounded-lg h-[200px] bg-[#F6D99A] flex items-center gap-4">
       <Image
         src="/resultImage.jpg"
         width={200}
