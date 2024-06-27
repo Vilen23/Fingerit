@@ -41,24 +41,17 @@ wss.on("connection", (ws: CustomWebSocket) => {
           ws.roomId = roomId;
           ws.userId = userId;
           ws.speed = 0;
-
-          console.log(`User ${userId} joined room ${roomId}`);
-
           const roomusers = await db.roomUser.findMany({
             where: {
               roomId: roomId,
             },
           });
 
-          console.log(`Room users for room ${roomId}:`, roomusers);
-
           const room = await db.room.findFirst({
             where: {
               id: roomId,
             },
           });
-
-          console.log(`Room details for room ${roomId}:`, room);
 
           if (room?.RoomOwnerId === ws.userId) {
             ws.words = word;
@@ -73,10 +66,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
                 gametext: true,
               },
             });
-
-            console.log(`Updated gametext for room ${roomId}:`, gametext);
           }
-
           const gametext = await db.room.findFirst({
             where: {
               id: roomId,
@@ -101,7 +91,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
             },
           });
           if (!rooms[roomId]) return;
-          console.log(rooms[roomId].size);
+          console.log("someone hopped in");
           rooms[roomId].forEach((client) => {
             if (client !== ws && client.readyState === WebSocket.OPEN) {
               client.send(
