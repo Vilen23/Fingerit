@@ -79,7 +79,6 @@ export const TypingComponent = () => {
     }
   }, [challengeStart, preference.mode]);
 
-console.log(preference.mode)
   useEffect(() => {
     if (preference.mode === "challenge") return;
     setCursorIndex(0);
@@ -185,6 +184,7 @@ console.log(preference.mode)
     const wordsTyped = correctInput / 5;
     const wpm = wordsTyped / timeElapsed;
     const speed = Math.max(0, Math.round(wpm));
+
     //Sending live speed to the websocket in challenge mode
     if (socket?.OPEN && preference.mode === "challenge") {
       socket.send(
@@ -286,7 +286,7 @@ console.log(preference.mode)
           />
         </div>
       )}
-      {/* {preference.mode === "challenge" && !isgameOver && (
+      {preference.mode === "challenge" && !isgameOver && (
         <div className="absolute bottom-[12vh] flex  gap-10 items-center">
           <Image
             src="/resultImage.jpg"
@@ -320,7 +320,7 @@ console.log(preference.mode)
             })}
           </div>
         </div>
-      )} */}
+      )}
       {isgameOver && preference.mode === "challenge" && (
         <div className="w-[600px] rounded-lg h-[200px] bg-[#F6D99A] flex gap-4 absolute bottom-[12vh]">
           <Image

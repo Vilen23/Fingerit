@@ -12,23 +12,23 @@ import { letterArrayAtom, wordDataAtom, wordsAtom } from "@/states/atoms/words";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { FaCrown } from "react-icons/fa";
-import { useRecoilState, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 
 export default function ChallengeRoom() {
   const session = useSession();
+  const [words, setWords] = useState("");
   const [timer, setTimer] = useState(5);
   const [timerStart, setTimerStart] = useState(false);
   const intervalRef = useRef<number | undefined>(undefined);
-  const [fetch, setFetch] = useRecoilState(fetchAtom);
   const [socket, setSocket] = useRecoilState(socketAtom);
   const [users, setUsers] = useRecoilState(challengeUsers);
-  const [wordsData, setWordsData] = useRecoilState(wordDataAtom);
   const [roomOwner, setRoomOwner] = useRecoilState(roomownerAtom);
-  const [textstring, setTextstring] = useRecoilState(wordsAtom);
-  const [letterarray, setLetterarray] = useRecoilState(letterArrayAtom);
-  const [usersSpeed, setUsersSpeed] = useRecoilState(userSpeedChallenge);
+  const wordsData = useRecoilValue(wordDataAtom);
+  const setFetch = useSetRecoilState(fetchAtom);
+  const setTextstring = useSetRecoilState(wordsAtom);
+  const setLetterarray = useSetRecoilState(letterArrayAtom);
+  const setUsersSpeed = useSetRecoilState(userSpeedChallenge);
   const setChallengeStart = useSetRecoilState(challengeStartAtom);
-
   const startTimer = () => {
     intervalRef.current = window.setInterval(() => {
       setTimer((prev) => {
@@ -60,15 +60,15 @@ export default function ChallengeRoom() {
       );
       stringtemp += wordsData.common_words[randomIndex] + " ";
     }
+    setWords(stringtemp);
   }, []);
 
   useEffect(() => {
     const roomId = window.location.pathname.split("/")[2];
     const userId = session?.data?.user.id;
-    if(!userId) return;
+    if (!userId) return;
     const createWebSocket = () => {
       const ws = new WebSocket(`${process.env.NEXT_PUBLIC_WEBSOCKET_URL}`);
-
       ws.onopen = () => {
         ws.send(
           JSON.stringify({
@@ -76,18 +76,15 @@ export default function ChallengeRoom() {
             payload: {
               roomId: roomId,
               userId: userId,
-              word: "hello this is shivam here",
+              word: words,
             },
           })
         );
-        console.log("WebSocket connection established.");
       };
 
       ws.onmessage = (event) => {
-        console.log("WebSocket message received:", event.data);
         const data = JSON.parse(event.data);
         if (data.action === "userJoined") {
-          console.log(data.payload);
           const payload = data.payload;
           handleUserJoined(payload);
         } else if (data.action === "speed") {
@@ -96,10 +93,10 @@ export default function ChallengeRoom() {
           setTimerStart(true);
           clearInterval(intervalRef.current);
           setTimer(5);
-          startTimer();
           setTimeout(() => {
             setChallengeStart(true);
           }, 5000);
+          startTimer();
         } else if (data.action === "reload") {
           window.location.reload();
         }
@@ -151,8 +148,8 @@ export default function ChallengeRoom() {
             className="bg-[#1C2022] px-3 py-2 rounded-lg font-semibold shadow-3xl"
             onClick={() => {
               setTimerStart(true);
-              clearInterval(intervalRef.current); // Clear any existing interval
-              setTimer(5); // Reset timer to 5 seconds
+              clearInterval(intervalRef.current);
+              setTimer(5);
               startTimer();
             }}
           >
