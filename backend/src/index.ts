@@ -24,7 +24,6 @@ export interface CustomWebSocket extends WebSocket {
 const wss = new WebSocketServer({ server: httpServer });
 const rooms: { [key: string]: Set<CustomWebSocket> } = {};
 wss.on("connection", (ws: CustomWebSocket) => {
-  console.log("connected");
   ws.on("error", console.error);
 
   ws.on("message", async (message) => {
@@ -33,7 +32,6 @@ wss.on("connection", (ws: CustomWebSocket) => {
       switch (action) {
         case "joinRoom":
           const { roomId, userId, word } = payload;
-          console.log(word);
           if (!rooms[roomId]) {
             rooms[roomId] = new Set();
           }
@@ -95,7 +93,6 @@ wss.on("connection", (ws: CustomWebSocket) => {
             room: room,
             words: ws.words || gametext?.gametext,
           };
-          console.log(data);
           if (!rooms[roomId]) return;
           rooms[roomId].forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
@@ -112,7 +109,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
           const roomid = ws.roomId;
           if (roomid && rooms[roomid]) {
             rooms[roomid].forEach((client) => {
-              if (client !== ws && client.readyState === WebSocket.OPEN) {
+              if (client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify({ action: "start" }));
               }
             });
