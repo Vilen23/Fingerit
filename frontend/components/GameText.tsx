@@ -99,6 +99,8 @@ export const TypingComponent = () => {
       const ws = new WebSocket(`wss://fingerit.onrender.com`);
       setSocket(ws);
       console.log(ws);
+      console.log(ws);
+      console.log(ws);
       let stringtemp = "";
       let common_words = wordsData.common_words;
       for (let i = 0; i < 10; i++) {
