@@ -61,46 +61,70 @@ export default function ChallengeRoom() {
       stringtemp += wordsData.common_words[randomIndex] + " ";
     }
   }, []);
-  
+
   useEffect(() => {
-    const ws = new WebSocket("wss://fingerit.onrender.com");
-    setSocket(ws);
-    ws.onopen = () => {
-      ws.send(
-        JSON.stringify({
-          action: "joinRoom",
-          payload: {
-            roomId: window.location.pathname.split("/")[2],
-            userId: session?.data?.user.id,
-            word: "hello this is shivam here",
-          },
-        })
-      );
-      console.log("going out");
+    const createWebSocket = () => {
+      const ws = new WebSocket("wss://fingerit.onrender.com");
+      ws.onopen = () => {
+        ws.send(
+          JSON.stringify({
+            action: "joinRoom",
+            payload: {
+              roomId: window.location.pathname.split("/")[2],
+              userId: session?.data?.user.id,
+              word: "hello this is shivam here",
+            },
+          })
+        );
+        console.log("WebSocket connection established.");
+      };
+
+      ws.onmessage = (event) => {
+        console.log("Message received");
+        const data = JSON.parse(event.data);
+        console.log(data);
+        if (data.action === "userJoined") {
+          const payload = data.payload;
+          handleUserJoined(payload);
+        } else if (data.action === "speed") {
+          setUsersSpeed(data.payload);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      ws.onclose = (event) => {
+        console.log("WebSocket connection closed, attempting to reconnect...");
+        setTimeout(() => {
+          createWebSocket();
+        }, 3000); // Attempt to reconnect after 3 seconds
+      };
+
+      setSocket(ws);
     };
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log(data);
-      if (data.action === "userJoined") {
-        const payload = data.payload;
-        handleuserJoined(payload);
-      } else if (data.action === "speed") {
-        setUsersSpeed(data.payload);
+    createWebSocket();
+
+    return () => {
+      if (socket) {
+        socket.close();
       }
+      setSocket(null);
     };
   }, [session]);
 
-  const handleuserJoined = (payload: any) => {
+  const handleUserJoined = (payload: any) => {
     setUsers(payload.users);
     setRoomOwner(payload.roomOwner);
-    let wordstring = payload.words.trim();
-    setTextstring(wordstring);
-    let temparray = Array.from(wordstring).map((char: any) => ({
+    let wordString = payload.words.trim();
+    setTextstring(wordString);
+    let tempArray = Array.from(wordString).map((char: any) => ({
       letter: char,
       color: "text-[#EBDAB4]/50",
     }));
-    setLetterarray(temparray);
+    setLetterarray(tempArray);
     setFetch(true);
   };
 
