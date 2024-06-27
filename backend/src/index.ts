@@ -8,12 +8,7 @@ import dataRouter from "./routes/data-routes";
 
 const app = express();
 const httpServer = app.listen(8080);
-app.use(
-  cors({
-    origin: "https://fingerit.vercel.app",
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
 
 app.use("/auth", authRouter);
@@ -118,7 +113,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
                     room: room,
                     words: ws.words || gametext?.gametext,
                   },
-                })
+                }),
               );
             }
           });
@@ -176,7 +171,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
           rooms[ws.roomId].forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
               client.send(
-                JSON.stringify({ action: "speed", payload: roomDetails })
+                JSON.stringify({ action: "speed", payload: roomDetails }),
               );
             }
           });
