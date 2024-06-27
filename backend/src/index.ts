@@ -31,6 +31,95 @@ wss.on("connection", (ws: CustomWebSocket) => {
   ws.on("message", async (message) => {
     const { action, payload } = JSON.parse(message.toString());
     switch (action) {
+      case "joinRoom":
+        const { roomId, userId, word } = payload;
+        if (!rooms[roomId]) {
+          rooms[roomId] = new Set();
+        }
+        rooms[roomId].add(ws);
+        ws.roomId = roomId;
+        ws.userId = userId;
+        ws.speed = 0;
+
+        console.log(`User ${userId} joined room ${roomId}`);
+
+        const roomusers = await db.roomUser.findMany({
+          where: {
+            roomId: roomId,
+          },
+        });
+
+        console.log(`Room users for room ${roomId}:`, roomusers);
+
+        const room = await db.room.findFirst({
+          where: {
+            id: roomId,
+          },
+        });
+
+        console.log(`Room details for room ${roomId}:`, room);
+
+        if (room?.RoomOwnerId === ws.userId) {
+          ws.words = word;
+          const gametext = await db.room.update({
+            where: {
+              id: roomId,
+            },
+            data: {
+              gametext: word,
+            },
+            select: {
+              gametext: true,
+            },
+          });
+
+          console.log(`Updated gametext for room ${roomId}:`, gametext);
+        }
+
+        const gametext = await db.room.findFirst({
+          where: {
+            id: roomId,
+          },
+          select: {
+            gametext: true,
+          },
+        });
+
+        const usersId = roomusers.map((user: any) => user.userId);
+        const users = await db.user.findMany({
+          where: {
+            id: {
+              in: usersId,
+            },
+          },
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            RoomOwner: true,
+          },
+        });
+
+        console.log(`Users in room ${roomId}:`, users);
+
+        if (!rooms[roomId]) return;
+        console.log(rooms[roomId].size);
+        rooms[roomId].forEach((client) => {
+          if (client !== ws && client.readyState === WebSocket.OPEN) {
+            client.send(
+              JSON.stringify({
+                action: "userJoined",
+                payload: {
+                  users: users,
+                  roomOwner: room?.RoomOwnerId,
+                  room: room,
+                  words: ws.words || gametext?.gametext,
+                },
+              })
+            );
+          }
+        });
+        break;
       case "start":
         const roomid = ws.roomId;
         if (roomid && rooms[roomid]) {
