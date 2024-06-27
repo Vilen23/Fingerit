@@ -88,31 +88,38 @@ export default function ChallengeRoom() {
           handleUserJoined(payload);
         } else if (data.action === "speed") {
           setUsersSpeed(data.payload);
+        } else if (data.action === "start") {
+          setTimerStart(true);
+          clearInterval(intervalRef.current);
+          setTimer(5);
+          startTimer();
+          setTimeout(() => {
+            setChallengeStart(true);
+          }, 5000);
+        } else if (data.action === "reload") {
+          window.location.reload();
         }
       };
 
       ws.onerror = (error) => {
         console.error("WebSocket error:", error);
       };
-
-      ws.onclose = (event) => {
-        console.log("WebSocket connection closed, attempting to reconnect...");
-        setTimeout(() => {
-          createWebSocket();
-        }, 3000); 
-      };
-
       setSocket(ws);
+
+      return ws;
     };
 
-    createWebSocket();
+    if (!socket) {
+      const ws = createWebSocket();
+      setSocket(ws);
 
-    return () => {
-      if (socket) {
-        socket.close();
-      }
-      setSocket(null);
-    };
+      return () => {
+        setSocket(null);
+        if (ws) {
+          ws.close();
+        }
+      };
+    }
   }, [session]);
 
   const handleUserJoined = (payload: any) => {
@@ -127,25 +134,6 @@ export default function ChallengeRoom() {
     setLetterarray(tempArray);
     setFetch(true);
   };
-
-  useEffect(() => {
-    if (socket) {
-      socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.action === "start") {
-          setTimerStart(true);
-          clearInterval(intervalRef.current); 
-          setTimer(5); 
-          startTimer();
-          setTimeout(() => {
-            setChallengeStart(true);
-          }, 5000);
-        } else if (data.action === "reload") {
-          window.location.reload();
-        }
-      };
-    }
-  }, [socket, setChallengeStart]);
 
   if (!session?.data?.user) return <div>Loading...</div>;
   return (
@@ -169,8 +157,8 @@ export default function ChallengeRoom() {
             className="bg-[#1C2022] px-3 py-2 rounded-lg font-semibold shadow-3xl"
             onClick={() => {
               setTimerStart(true);
-              clearInterval(intervalRef.current); // Clear any existing interval
-              setTimer(5); // Reset timer to 5 seconds
+              clearInterval(intervalRef.current);
+              setTimer(5);
               startTimer();
             }}
           >
