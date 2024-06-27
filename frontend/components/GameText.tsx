@@ -18,7 +18,12 @@ import {
 import "./cursorblink.css";
 import { ResultCard } from "./ResultCard";
 import { roomownerAtom } from "@/states/atoms/roomowner";
-import { challengeStartAtom, challengeUsers, fetchAtom, userSpeedChallenge } from "@/states/atoms/challenge";
+import {
+  challengeStartAtom,
+  challengeUsers,
+  fetchAtom,
+  userSpeedChallenge,
+} from "@/states/atoms/challenge";
 import { socketAtom } from "@/states/atoms/socket";
 import Image from "next/image";
 interface LetterProps {
@@ -278,7 +283,7 @@ export const TypingComponent = () => {
         className="mt-4 p-2 border-0 rounded absolute opacity-0  w-[80vw] "
       />
       {isgameOver && preference.mode !== "challenge" && (
-        <div className="absolute bottom-[200px]">
+        <div className="absolute bottom-[12vh]">
           <ResultCard
             accuracy={result.accuracy}
             speed={result.speed}
