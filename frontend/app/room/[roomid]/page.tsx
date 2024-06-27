@@ -81,6 +81,7 @@ export default function ChallengeRoom() {
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      console.log(data);
       if (data.action === "userJoined") {
         const payload = data.payload;
         handleuserJoined(payload);
