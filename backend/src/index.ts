@@ -22,8 +22,7 @@ export interface CustomWebSocket extends WebSocket {
 }
 
 const wss = new WebSocketServer({ server: httpServer });
-export const rooms: { [key: string]: Set<CustomWebSocket> } = {};
-app.set("wss", wss);
+const rooms: { [key: string]: Set<CustomWebSocket> } = {};
 wss.on("connection", (ws: CustomWebSocket) => {
   console.log("connected");
   ws.on("error", console.error);
@@ -75,7 +74,6 @@ wss.on("connection", (ws: CustomWebSocket) => {
               gametext: true,
             },
           });
-
           const usersId = roomusers.map((user: any) => user.userId);
           const users = await db.user.findMany({
             where: {
@@ -95,6 +93,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
           if (!rooms[roomId]) return;
           rooms[roomId].forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
+              console.log(client);
               client.send(
                 JSON.stringify({
                   action: "userJoined",
