@@ -33,6 +33,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
       switch (action) {
         case "joinRoom":
           const { roomId, userId, word } = payload;
+          console.log(word);
           if (!rooms[roomId]) {
             rooms[roomId] = new Set();
           }
@@ -88,22 +89,21 @@ wss.on("connection", (ws: CustomWebSocket) => {
               RoomOwner: true,
             },
           });
-          console.log(users);
-          console.log(rooms[roomId].size);
+          const data: any = {
+            users: users,
+            roomOwner: room?.RoomOwnerId,
+            room: room,
+            words: ws.words || gametext?.gametext,
+          };
+          console.log(data);
           if (!rooms[roomId]) return;
           rooms[roomId].forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
-              console.log(client);
               client.send(
                 JSON.stringify({
                   action: "userJoined",
-                  payload: {
-                    users: users,
-                    roomOwner: room?.RoomOwnerId,
-                    room: room,
-                    words: ws.words || gametext?.gametext,
-                  },
-                }),
+                  payload: data,
+                })
               );
             }
           });
@@ -161,7 +161,7 @@ wss.on("connection", (ws: CustomWebSocket) => {
           rooms[ws.roomId].forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
               client.send(
-                JSON.stringify({ action: "speed", payload: roomDetails }),
+                JSON.stringify({ action: "speed", payload: roomDetails })
               );
             }
           });
