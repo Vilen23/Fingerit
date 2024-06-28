@@ -248,7 +248,7 @@ export const TypingComponent = () => {
     if (wrongInputs > 0 && event.key !== "Backspace") event.preventDefault();
   };
 
-
+  if(!letterarray) return <div>Loading...</div>
   return (
     <div
       className={`flex justify-center items-center flex-col ${
