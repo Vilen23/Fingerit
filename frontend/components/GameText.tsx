@@ -65,7 +65,7 @@ export const TypingComponent = () => {
 
   //Fetching the words from the backend and setting them into recoil state and persisting it into local storage
   useEffect(() => {
-    if (session.data && !isData) {
+    if (!isData) {
       const getData = async () => {
         const response = await axios.get(`
           ${process.env.NEXT_PUBLIC_API_URL}/getData`);
@@ -248,12 +248,7 @@ export const TypingComponent = () => {
     if (wrongInputs > 0 && event.key !== "Backspace") event.preventDefault();
   };
 
-  if (!session || !session.data)
-    return (
-      <div className="flex justify-center items-center flex-col h-[60vh]">
-        Loading....
-      </div>
-    );
+
   return (
     <div
       className={`flex justify-center items-center flex-col ${

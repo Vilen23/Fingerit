@@ -1,10 +1,10 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import { LoginPage } from "./LoginPage";
 
 export const LandingPage = () => {
-  return (
-    <div>
-      <LoginPage />
-    </div>
-  );
+  useEffect(() => {
+    window.location.href = "/practise";
+  }, []);
+  return <div></div>;
 };

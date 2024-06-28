@@ -48,7 +48,7 @@ export const Navbar = () => {
           onMouseLeave={() => setLogoutHover(false)}
           className={`flex items-center gap-2 text-[#EBDAB4]/50 hover:text-[#EBDAB4] cursor-pointer transition-all duration-200 }`}
         >
-          {!session.data && <CiUser size={25} />}
+          {!session.data && <CiUser size={25} onClick={()=>window.location.href = "/login"}/>}
           <div>
             {session.data && (
               <div className="flex items-center ">
@@ -72,9 +72,22 @@ export const Navbar = () => {
             />
           )}
         </div>
-        {logoutHover && (
+        {session.data && logoutHover && (
           <div className="absolute left-10 transition-opacity duration-200 text-[#CD4E28]">
             <span className="text-[#ebdab4]">L</span>ogout
+          </div>
+        )}
+        {!session.data && logoutHover && (
+          <div className="absolute left-10 transition-opacity duration-200 text-[#CD4E28]">
+            <span
+              onClick={() => {
+                window.location.href = "/login";
+              }}
+              className="text-[#ebdab4]"
+            >
+              L
+            </span>
+            ogin
           </div>
         )}
       </div>
