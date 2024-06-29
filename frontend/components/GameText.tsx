@@ -255,7 +255,7 @@ export const TypingComponent = () => {
         preference.mode === "challenge" ? "h-[40vh]" : "h-[60vh]"
       } `}
     >
-      <div className="text-[30px] relative w-[80vw] text-justify">
+      <div className="text-[30px] relative w-[80vw] text-center">
         {letterarray.map((word, index) => (
           <span
             key={index}
@@ -276,7 +276,7 @@ export const TypingComponent = () => {
         placeholder=""
         onKeyDown={handleKeyPresses}
         onChange={handleInputChange}
-        className="mt-4 p-2 border-0 rounded absolute opacity-0  w-[80vw] text-[30px] text-justify"
+        className="mt-4 p-2 border-0 rounded absolute opacity-0  w-[80vw] text-[30px] text-center"
       />
       {isgameOver && preference.mode !== "challenge" && (
         <div className="absolute bottom-[12vh]">
