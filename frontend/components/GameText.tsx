@@ -108,7 +108,7 @@ export const TypingComponent = () => {
       let char = charCustom;
       let characters = char.split("");
       const filteredWords = common_words.filter((word: any) =>
-        characters.some((char) => word.includes(char)),
+        characters.some((char) => word.includes(char))
       );
       for (let i = filteredWords.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -171,7 +171,7 @@ export const TypingComponent = () => {
         } else {
           return { ...item, color: "text-[#EBDAB4]/50" };
         }
-      },
+      }
     );
 
     setCorrectInput(newCorrectInput);
@@ -197,7 +197,7 @@ export const TypingComponent = () => {
         JSON.stringify({
           action: "speed",
           payload: { speed: speed, user: session?.data?.user },
-        }),
+        })
       );
     }
     if (cursorIndex === textstring.length - 1) {
@@ -248,14 +248,14 @@ export const TypingComponent = () => {
     if (wrongInputs > 0 && event.key !== "Backspace") event.preventDefault();
   };
 
-  if(!letterarray) return <div>Loading...</div>
+  if (!letterarray) return <div>Loading...</div>;
   return (
     <div
       className={`flex justify-center items-center flex-col ${
         preference.mode === "challenge" ? "h-[40vh]" : "h-[60vh]"
       } `}
     >
-      <div className="text-[30px] relative w-[80vw] text-center">
+      <div className="text-[30px] relative w-[80vw] text-justify">
         {letterarray.map((word, index) => (
           <span
             key={index}
@@ -276,7 +276,7 @@ export const TypingComponent = () => {
         placeholder=""
         onKeyDown={handleKeyPresses}
         onChange={handleInputChange}
-        className="mt-4 p-2 border-0 rounded absolute opacity-0  w-[80vw] "
+        className="mt-4 p-2 border-0 rounded absolute opacity-0  w-[80vw] text-[30px] text-justify"
       />
       {isgameOver && preference.mode !== "challenge" && (
         <div className="absolute bottom-[12vh]">
@@ -308,7 +308,7 @@ export const TypingComponent = () => {
                       })
                       .sort(
                         (a: userSpeedProps, b: userSpeedProps) =>
-                          b.speed - a.speed,
+                          b.speed - a.speed
                       )
                       .map((user: userSpeedProps) => (
                         <p key={user.speed}>{user.speed}</p>
@@ -338,7 +338,7 @@ export const TypingComponent = () => {
               .sort((a: userSpeedProps, b: userSpeedProps) => b.speed - a.speed)
               .map((userSpeed: userSpeedProps) => {
                 const user = users.find(
-                  (user: any) => user.id === userSpeed.user.id,
+                  (user: any) => user.id === userSpeed.user.id
                 );
                 return (
                   <div className="flex gap-4" key={userSpeed.user.id}>
