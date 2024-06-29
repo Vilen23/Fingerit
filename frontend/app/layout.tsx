@@ -22,6 +22,9 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           {children}
+          <div className="absoulute bottom-5 text-[15px] w-full text-center">
+            UI inspired by Monkeytype.com
+          </div>
         </Providers>
       </body>
     </html>
